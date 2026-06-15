@@ -93,12 +93,12 @@ create table if not exists public.reviews (
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-as $$
+as '
 begin
   new.updated_at = now();
   return new;
 end;
-$$;
+';
 
 drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
@@ -123,48 +123,59 @@ alter table public.worker_photos enable row level security;
 alter table public.bookings enable row level security;
 alter table public.reviews enable row level security;
 
+drop policy if exists "Services are public" on public.services;
 create policy "Services are public"
 on public.services for select
 using (true);
 
+drop policy if exists "Verified worker profiles are public" on public.worker_profiles;
 create policy "Verified worker profiles are public"
 on public.worker_profiles for select
 using (verification_status = 'verified' or user_id = auth.uid());
 
+drop policy if exists "Worker services are public" on public.worker_services;
 create policy "Worker services are public"
 on public.worker_services for select
 using (true);
 
+drop policy if exists "Worker photos are public" on public.worker_photos;
 create policy "Worker photos are public"
 on public.worker_photos for select
 using (true);
 
+drop policy if exists "Users can read their own profile" on public.profiles;
 create policy "Users can read their own profile"
 on public.profiles for select
 using (id = auth.uid());
 
+drop policy if exists "Users can create their own profile" on public.profiles;
 create policy "Users can create their own profile"
 on public.profiles for insert
 with check (id = auth.uid());
 
+drop policy if exists "Users can update their own profile" on public.profiles;
 create policy "Users can update their own profile"
 on public.profiles for update
 using (id = auth.uid())
 with check (id = auth.uid());
 
+drop policy if exists "Workers can create their own worker profile" on public.worker_profiles;
 create policy "Workers can create their own worker profile"
 on public.worker_profiles for insert
 with check (user_id = auth.uid());
 
+drop policy if exists "Workers can update their own worker profile" on public.worker_profiles;
 create policy "Workers can update their own worker profile"
 on public.worker_profiles for update
 using (user_id = auth.uid())
 with check (user_id = auth.uid());
 
+drop policy if exists "Clients can create bookings" on public.bookings;
 create policy "Clients can create bookings"
 on public.bookings for insert
 with check (client_id = auth.uid());
 
+drop policy if exists "Clients and workers can read their bookings" on public.bookings;
 create policy "Clients and workers can read their bookings"
 on public.bookings for select
 using (
@@ -177,6 +188,7 @@ using (
   )
 );
 
+drop policy if exists "Clients and workers can update their bookings" on public.bookings;
 create policy "Clients and workers can update their bookings"
 on public.bookings for update
 using (
@@ -189,6 +201,7 @@ using (
   )
 );
 
+drop policy if exists "Booking participants can read reviews" on public.reviews;
 create policy "Booking participants can read reviews"
 on public.reviews for select
 using (
@@ -201,6 +214,7 @@ using (
   )
 );
 
+drop policy if exists "Clients can review completed bookings" on public.reviews;
 create policy "Clients can review completed bookings"
 on public.reviews for insert
 with check (
