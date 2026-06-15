@@ -30,25 +30,26 @@
         <p class="eyebrow">Client and worker portals</p>
         <h1 id="hero-title">Find trusted workers near you.</h1>
         <p class="hero-text">Book verified plumbers, masons, electricians, painters, carpenters, cleaners, and gardeners with ratings, photos, clear pricing, and live availability.</p>
-        <form class="search-panel" aria-label="Find a worker">
+        <form class="search-panel" id="worker-search" aria-label="Find a worker">
           <label>
             <span>Service</span>
-            <select>
-              <option>Plumber</option>
-              <option>Mason</option>
-              <option>Electrician</option>
-              <option>Painter</option>
-              <option>Carpenter</option>
-              <option>Cleaner</option>
-              <option>Gardener</option>
+            <select id="service-select" name="service">
+              <option value="plumber">Plumber</option>
+              <option value="mason">Mason</option>
+              <option value="electrician">Electrician</option>
+              <option value="painter">Painter</option>
+              <option value="carpenter">Carpenter</option>
+              <option value="cleaner">Cleaner</option>
+              <option value="gardener">Gardener</option>
             </select>
           </label>
           <label>
             <span>Location</span>
-            <input type="text" value="Near me" aria-label="Location">
+            <input type="text" name="location" value="Near me" aria-label="Location">
           </label>
           <button type="submit">Search</button>
         </form>
+        <p class="data-status" id="data-status">Connecting to LABOUR database...</p>
         <div class="hero-actions">
           <a class="solid-button" href="#workers">Find Worker</a>
           <a class="ghost-button" href="#worker-flow">Register as Worker</a>
@@ -65,7 +66,7 @@
             <div class="avatar plumber"></div>
             <div>
               <strong>Daniel O.</strong>
-              <span>Plumber • 1.2 km</span>
+              <span>Plumber - 1.2 km</span>
             </div>
             <button type="button">Call</button>
           </article>
@@ -73,7 +74,7 @@
             <div class="avatar electrician"></div>
             <div>
               <strong>Amina K.</strong>
-              <span>Electrician • Available today</span>
+              <span>Electrician - Available today</span>
             </div>
             <button type="button">Chat</button>
           </article>
@@ -91,14 +92,14 @@
         <p class="eyebrow">Categories</p>
         <h2 id="categories-title">Choose the trade you need</h2>
       </div>
-      <div class="category-grid">
-        <button type="button">Mason</button>
-        <button type="button">Plumber</button>
-        <button type="button">Electrician</button>
-        <button type="button">Painter</button>
-        <button type="button">Carpenter</button>
-        <button type="button">Cleaner</button>
-        <button type="button">Gardener</button>
+      <div class="category-grid" id="category-grid">
+        <button type="button" data-service="mason">Mason</button>
+        <button type="button" data-service="plumber">Plumber</button>
+        <button type="button" data-service="electrician">Electrician</button>
+        <button type="button" data-service="painter">Painter</button>
+        <button type="button" data-service="carpenter">Carpenter</button>
+        <button type="button" data-service="cleaner">Cleaner</button>
+        <button type="button" data-service="gardener">Gardener</button>
       </div>
     </section>
 
@@ -113,7 +114,7 @@
           <div class="worker-body">
             <div>
               <h3>Daniel Otieno</h3>
-              <p>Plumber • 6 years experience</p>
+              <p>Plumber - 6 years experience</p>
             </div>
             <span class="badge">Verified</span>
             <dl>
@@ -129,7 +130,7 @@
           <div class="worker-body">
             <div>
               <h3>Amina Kariuki</h3>
-              <p>Electrician • Weekend jobs</p>
+              <p>Electrician - Weekend jobs</p>
             </div>
             <span class="badge">Verified</span>
             <dl>
@@ -145,7 +146,7 @@
           <div class="worker-body">
             <div>
               <h3>Brian Mwangi</h3>
-              <p>Carpenter • Furniture repair</p>
+              <p>Carpenter - Furniture repair</p>
             </div>
             <span class="badge">Verified</span>
             <dl>
@@ -191,11 +192,11 @@
       <form class="booking-card" aria-label="Book a worker">
         <label>
           <span>Job type</span>
-          <select>
-            <option>Emergency plumbing</option>
-            <option>House painting</option>
-            <option>Electrical repair</option>
-            <option>Garden cleanup</option>
+          <select id="booking-service-select" name="service">
+            <option value="plumber">Emergency plumbing</option>
+            <option value="painter">House painting</option>
+            <option value="electrician">Electrical repair</option>
+            <option value="gardener">Garden cleanup</option>
           </select>
         </label>
         <label>
@@ -230,5 +231,7 @@
     <strong>LABOUR</strong>
     <span>www.x.com concept prototype</span>
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
 </body>
 </html>

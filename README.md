@@ -15,3 +15,9 @@ Then visit `http://127.0.0.1:4173`.
 ## Deploy With GitHub Pages
 
 After pushing this folder to GitHub, go to the repository settings, open **Pages**, and deploy from the `main` branch root.
+
+## Supabase Connection
+
+The frontend connects to Supabase in `app.js` using the public project URL and anon publishable key.
+
+Run `database/schema.sql` in the Supabase SQL Editor before expecting live services, worker profiles, bookings, and reviews to work.
