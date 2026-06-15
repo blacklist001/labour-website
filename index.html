@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LABOUR | Trusted Workers Near You</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="LABOUR home">
+      <span class="brand-mark">L</span>
+      <span>LABOUR</span>
+    </a>
+    <nav class="main-nav" aria-label="Primary navigation">
+      <a href="#workers">Workers</a>
+      <a href="#client-flow">Client Flow</a>
+      <a href="#worker-flow">Worker Portal</a>
+      <a href="#features">Features</a>
+    </nav>
+    <div class="header-actions">
+      <a class="ghost-button" href="#worker-flow">Register</a>
+      <a class="solid-button" href="#booking">Hire Now</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Client and worker portals</p>
+        <h1 id="hero-title">Find trusted workers near you.</h1>
+        <p class="hero-text">Book verified plumbers, masons, electricians, painters, carpenters, cleaners, and gardeners with ratings, photos, clear pricing, and live availability.</p>
+        <form class="search-panel" aria-label="Find a worker">
+          <label>
+            <span>Service</span>
+            <select>
+              <option>Plumber</option>
+              <option>Mason</option>
+              <option>Electrician</option>
+              <option>Painter</option>
+              <option>Carpenter</option>
+              <option>Cleaner</option>
+              <option>Gardener</option>
+            </select>
+          </label>
+          <label>
+            <span>Location</span>
+            <input type="text" value="Near me" aria-label="Location">
+          </label>
+          <button type="submit">Search</button>
+        </form>
+        <div class="hero-actions">
+          <a class="solid-button" href="#workers">Find Worker</a>
+          <a class="ghost-button" href="#worker-flow">Register as Worker</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-label="LABOUR app preview">
+        <div class="phone-shell">
+          <div class="phone-top">
+            <span>Nearby workers</span>
+            <strong>4.8</strong>
+          </div>
+          <article class="mini-worker">
+            <div class="avatar plumber"></div>
+            <div>
+              <strong>Daniel O.</strong>
+              <span>Plumber • 1.2 km</span>
+            </div>
+            <button type="button">Call</button>
+          </article>
+          <article class="mini-worker">
+            <div class="avatar electrician"></div>
+            <div>
+              <strong>Amina K.</strong>
+              <span>Electrician • Available today</span>
+            </div>
+            <button type="button">Chat</button>
+          </article>
+          <div class="map-card">
+            <span class="pin pin-one"></span>
+            <span class="pin pin-two"></span>
+            <span class="pin pin-three"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="categories" aria-labelledby="categories-title">
+      <div class="section-heading">
+        <p class="eyebrow">Categories</p>
+        <h2 id="categories-title">Choose the trade you need</h2>
+      </div>
+      <div class="category-grid">
+        <button type="button">Mason</button>
+        <button type="button">Plumber</button>
+        <button type="button">Electrician</button>
+        <button type="button">Painter</button>
+        <button type="button">Carpenter</button>
+        <button type="button">Cleaner</button>
+        <button type="button">Gardener</button>
+      </div>
+    </section>
+
+    <section id="workers" class="workers" aria-labelledby="workers-title">
+      <div class="section-heading">
+        <p class="eyebrow">Top rated workers</p>
+        <h2 id="workers-title">Verified help with proof of work</h2>
+      </div>
+      <div class="worker-grid">
+        <article class="worker-card">
+          <div class="worker-photo plumber"></div>
+          <div class="worker-body">
+            <div>
+              <h3>Daniel Otieno</h3>
+              <p>Plumber • 6 years experience</p>
+            </div>
+            <span class="badge">Verified</span>
+            <dl>
+              <div><dt>Rating</dt><dd>4.9</dd></div>
+              <div><dt>Price</dt><dd>KSh 1,500</dd></div>
+              <div><dt>Available</dt><dd>Today</dd></div>
+            </dl>
+            <a href="#booking">View Profile</a>
+          </div>
+        </article>
+        <article class="worker-card">
+          <div class="worker-photo electrician"></div>
+          <div class="worker-body">
+            <div>
+              <h3>Amina Kariuki</h3>
+              <p>Electrician • Weekend jobs</p>
+            </div>
+            <span class="badge">Verified</span>
+            <dl>
+              <div><dt>Rating</dt><dd>4.8</dd></div>
+              <div><dt>Price</dt><dd>KSh 2,200</dd></div>
+              <div><dt>Available</dt><dd>2 pm</dd></div>
+            </dl>
+            <a href="#booking">View Profile</a>
+          </div>
+        </article>
+        <article class="worker-card">
+          <div class="worker-photo carpenter"></div>
+          <div class="worker-body">
+            <div>
+              <h3>Brian Mwangi</h3>
+              <p>Carpenter • Furniture repair</p>
+            </div>
+            <span class="badge">Verified</span>
+            <dl>
+              <div><dt>Rating</dt><dd>4.7</dd></div>
+              <div><dt>Price</dt><dd>KSh 1,800</dd></div>
+              <div><dt>Available</dt><dd>Fri</dd></div>
+            </dl>
+            <a href="#booking">View Profile</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="flows">
+      <article id="client-flow" class="flow-panel">
+        <p class="eyebrow">Client Flow</p>
+        <h2>From search to review</h2>
+        <ol>
+          <li>Sign up or log in.</li>
+          <li>Choose service and see workers near you.</li>
+          <li>View ratings, experience, price, photos, and availability.</li>
+          <li>Hire, pay online or in cash, then rate and review.</li>
+        </ol>
+      </article>
+      <article id="worker-flow" class="flow-panel dark">
+        <p class="eyebrow">Worker Flow</p>
+        <h2>Register, get verified, receive jobs</h2>
+        <ol>
+          <li>Add personal details, phone, and ID verification.</li>
+          <li>Choose profession and optional education or skills.</li>
+          <li>Set location, working hours, and previous work photos.</li>
+          <li>Receive job requests and get paid.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section id="booking" class="booking" aria-labelledby="booking-title">
+      <div>
+        <p class="eyebrow">Worker profile</p>
+        <h2 id="booking-title">Hire with confidence</h2>
+        <p>Each profile combines identity verification, job history, a gallery, ratings, chat, call, emergency availability, and English or Swahili support.</p>
+      </div>
+      <form class="booking-card" aria-label="Book a worker">
+        <label>
+          <span>Job type</span>
+          <select>
+            <option>Emergency plumbing</option>
+            <option>House painting</option>
+            <option>Electrical repair</option>
+            <option>Garden cleanup</option>
+          </select>
+        </label>
+        <label>
+          <span>Preferred time</span>
+          <input type="datetime-local">
+        </label>
+        <label>
+          <span>Contact number</span>
+          <input type="tel" placeholder="+254 700 000 000">
+        </label>
+        <button type="submit">Request Job</button>
+      </form>
+    </section>
+
+    <section id="features" class="features" aria-labelledby="features-title">
+      <div class="section-heading">
+        <p class="eyebrow">Key features</p>
+        <h2 id="features-title">Built for local work</h2>
+      </div>
+      <div class="feature-grid">
+        <article><h3>GPS location</h3><p>Find available workers nearby and sort by distance.</p></article>
+        <article><h3>Ratings and reviews</h3><p>Compare real feedback before making a booking.</p></article>
+        <article><h3>Chat and call</h3><p>Confirm details quickly through the worker profile.</p></article>
+        <article><h3>Payments</h3><p>Support online payment or cash depending on the job.</p></article>
+        <article><h3>Emergency jobs</h3><p>Mark urgent jobs and surface available professionals fast.</p></article>
+        <article><h3>EN and SW</h3><p>Make the platform accessible in English and Swahili.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <strong>LABOUR</strong>
+    <span>www.x.com concept prototype</span>
+  </footer>
+</body>
+</html>
