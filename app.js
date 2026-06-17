@@ -15,6 +15,9 @@ const bookingForm = document.querySelector("#booking-form");
 const selectedWorkerEl = document.querySelector("#selected-worker");
 const jobsStatusEl = document.querySelector("#jobs-status");
 const jobsList = document.querySelector("#jobs-list");
+const adminSection = document.querySelector("#admin");
+const adminStatusEl = document.querySelector("#admin-status");
+const adminList = document.querySelector("#admin-list");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
 const logoutButton = document.querySelector("#logout-button");
@@ -41,6 +44,12 @@ function setJobsStatus(message, tone = "neutral") {
   if (!jobsStatusEl) return;
   jobsStatusEl.textContent = message;
   jobsStatusEl.dataset.tone = tone;
+}
+
+function setAdminStatus(message, tone = "neutral") {
+  if (!adminStatusEl) return;
+  adminStatusEl.textContent = message;
+  adminStatusEl.dataset.tone = tone;
 }
 
 function optionFor(service) {
@@ -227,6 +236,41 @@ function renderBookings(bookings) {
   setJobsStatus(`Loaded ${bookings.length} job${bookings.length === 1 ? "" : "s"}.`, "success");
 }
 
+function renderPendingWorkers(workers) {
+  if (!adminList) return;
+
+  if (!workers.length) {
+    adminList.innerHTML = `
+      <article class="admin-card">
+        <h3>No pending workers</h3>
+        <p>New worker registrations will appear here.</p>
+      </article>
+    `;
+    setAdminStatus("No pending workers right now.", "success");
+    return;
+  }
+
+  adminList.innerHTML = workers.map((worker) => `
+    <article class="admin-card">
+      <div>
+        <h3>${escapeHtml(worker.display_name || "Unnamed worker")}</h3>
+        <p>${escapeHtml(worker.bio || "No bio added.")}</p>
+      </div>
+      <dl>
+        <div><dt>Location</dt><dd>${escapeHtml(worker.location_name || "None")}</dd></div>
+        <div><dt>Price</dt><dd>${formatMoney(worker.base_price)}</dd></div>
+        <div><dt>Status</dt><dd>${escapeHtml(worker.verification_status)}</dd></div>
+      </dl>
+      <div class="admin-actions">
+        <button type="button" data-worker-id="${worker.id}" data-verification="verified">Approve</button>
+        <button type="button" data-worker-id="${worker.id}" data-verification="rejected">Reject</button>
+      </div>
+    </article>
+  `).join("");
+
+  setAdminStatus(`Loaded ${workers.length} pending worker${workers.length === 1 ? "" : "s"}.`, "success");
+}
+
 async function loadServices() {
   setStatus("Connecting to LABOUR database...");
 
@@ -330,6 +374,49 @@ async function loadBookings() {
   renderBookings(data || []);
 }
 
+async function loadPendingWorkers() {
+  if (currentProfile?.role !== "admin") {
+    adminList?.replaceChildren();
+    setAdminStatus("Log in as an admin to review workers.");
+    return;
+  }
+
+  setAdminStatus("Loading pending workers...");
+
+  const { data, error } = await db
+    .from("worker_profiles")
+    .select("id, display_name, bio, location_name, base_price, verification_status, created_at")
+    .eq("verification_status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Pending workers load error:", error);
+    setAdminStatus(error.message, "error");
+    return;
+  }
+
+  renderPendingWorkers(data || []);
+}
+
+async function updateWorkerVerification(workerId, verificationStatus) {
+  setAdminStatus("Updating worker...");
+
+  const { error } = await db
+    .from("worker_profiles")
+    .update({ verification_status: verificationStatus })
+    .eq("id", workerId);
+
+  if (error) {
+    console.error("Worker verification error:", error);
+    setAdminStatus(error.message, "error");
+    return;
+  }
+
+  setAdminStatus(`Worker ${verificationStatus}.`, "success");
+  await loadPendingWorkers();
+  await loadWorkers();
+}
+
 async function updateBookingStatus(bookingId, status) {
   setJobsStatus("Updating job...");
   const { error } = await db
@@ -412,16 +499,19 @@ function updateAuthUI() {
   const isLoggedIn = Boolean(currentUser);
   logoutButton.hidden = !isLoggedIn;
   workerProfileForm.hidden = !(isLoggedIn && currentProfile?.role === "worker");
+  adminSection.hidden = !(isLoggedIn && currentProfile?.role === "admin");
 
   if (!isLoggedIn) {
     setAccountStatus("Not logged in.");
     renderBookings([]);
+    loadPendingWorkers();
     return;
   }
 
   const role = currentProfile?.role || "client";
   setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
   loadBookings();
+  loadPendingWorkers();
 }
 
 async function refreshSession() {
@@ -602,6 +692,12 @@ jobsList?.addEventListener("submit", (event) => {
   if (!form) return;
   event.preventDefault();
   submitReview(form);
+});
+
+adminList?.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-worker-id][data-verification]");
+  if (!button) return;
+  updateWorkerVerification(button.dataset.workerId, button.dataset.verification);
 });
 
 workerProfileForm?.addEventListener("submit", async (event) => {

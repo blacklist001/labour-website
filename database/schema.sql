@@ -112,6 +112,20 @@ begin
 end;
 ';
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as '
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = ''admin''
+  );
+';
+
 drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
 before update on public.profiles
@@ -171,7 +185,7 @@ using (true);
 drop policy if exists "Verified worker profiles are public" on public.worker_profiles;
 create policy "Verified worker profiles are public"
 on public.worker_profiles for select
-using (verification_status = 'verified' or user_id = auth.uid());
+using (verification_status = 'verified' or user_id = auth.uid() or public.is_admin());
 
 drop policy if exists "Worker services are public" on public.worker_services;
 create policy "Worker services are public"
@@ -229,6 +243,12 @@ create policy "Workers can update their own worker profile"
 on public.worker_profiles for update
 using (user_id = auth.uid())
 with check (user_id = auth.uid());
+
+drop policy if exists "Admins can update worker verification" on public.worker_profiles;
+create policy "Admins can update worker verification"
+on public.worker_profiles for update
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "Clients can create bookings" on public.bookings;
 create policy "Clients can create bookings"

@@ -363,6 +363,7 @@ input {
 .workers,
 .booking,
 .jobs,
+.admin,
 .features,
 .flows {
   padding: clamp(54px, 7vw, 96px) clamp(18px, 4vw, 64px);
@@ -588,31 +589,37 @@ dd {
   background: var(--white);
 }
 
-.jobs-panel {
+.jobs-panel,
+.admin-panel {
   display: grid;
   gap: 18px;
 }
 
-.jobs-status {
+.jobs-status,
+.admin-status {
   margin: 0;
   color: var(--muted);
   font-weight: 900;
 }
 
-.jobs-status[data-tone="success"] {
+.jobs-status[data-tone="success"],
+.admin-status[data-tone="success"] {
   color: var(--green);
 }
 
-.jobs-status[data-tone="error"] {
+.jobs-status[data-tone="error"],
+.admin-status[data-tone="error"] {
   color: var(--red);
 }
 
-.jobs-list {
+.jobs-list,
+.admin-list {
   display: grid;
   gap: 14px;
 }
 
-.job-card {
+.job-card,
+.admin-card {
   display: grid;
   gap: 12px;
   padding: 20px;
@@ -621,7 +628,8 @@ dd {
   border-radius: 8px;
 }
 
-.job-card p {
+.job-card p,
+.admin-card p {
   margin: 0;
   color: var(--muted);
 }
@@ -630,13 +638,15 @@ dd {
   font-weight: 800;
 }
 
-.job-actions {
+.job-actions,
+.admin-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.job-actions button {
+.job-actions button,
+.admin-actions button {
   min-height: 40px;
   padding: 0 16px;
   color: var(--white);
@@ -645,6 +655,10 @@ dd {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 900;
+}
+
+.admin {
+  background: #eef6f0;
 }
 
 .review-form {
