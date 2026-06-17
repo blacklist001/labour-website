@@ -28,7 +28,8 @@ values
   ('Painter', 'painter'),
   ('Carpenter', 'carpenter'),
   ('Cleaner', 'cleaner'),
-  ('Gardener', 'gardener')
+  ('Gardener', 'gardener'),
+  ('Mechanic', 'mechanic')
 on conflict (slug) do nothing;
 
 create table if not exists public.worker_profiles (
