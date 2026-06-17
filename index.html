@@ -14,12 +14,13 @@
     </a>
     <nav class="main-nav" aria-label="Primary navigation">
       <a href="#workers">Workers</a>
+      <a href="#account">Account</a>
       <a href="#client-flow">Client Flow</a>
       <a href="#worker-flow">Worker Portal</a>
       <a href="#features">Features</a>
     </nav>
     <div class="header-actions">
-      <a class="ghost-button" href="#worker-flow">Register</a>
+      <a class="ghost-button" href="#account">Register</a>
       <a class="solid-button" href="#booking">Hire Now</a>
     </div>
   </header>
@@ -52,7 +53,7 @@
         <p class="data-status" id="data-status">Connecting to LABOUR database...</p>
         <div class="hero-actions">
           <a class="solid-button" href="#workers">Find Worker</a>
-          <a class="ghost-button" href="#worker-flow">Register as Worker</a>
+          <a class="ghost-button" href="#account">Register as Worker</a>
         </div>
       </div>
 
@@ -84,6 +85,91 @@
             <span class="pin pin-three"></span>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section id="account" class="account" aria-labelledby="account-title">
+      <div class="section-heading">
+        <p class="eyebrow">Account</p>
+        <h2 id="account-title">Create your LABOUR account</h2>
+        <p class="section-copy">Clients can book workers. Workers can register, add trade details, and prepare to receive job requests.</p>
+      </div>
+      <div class="account-grid">
+        <form class="auth-card" id="signup-form" aria-label="Create account">
+          <h3>Sign up</h3>
+          <label>
+            <span>Full name</span>
+            <input type="text" name="full_name" autocomplete="name" required>
+          </label>
+          <label>
+            <span>Phone</span>
+            <input type="tel" name="phone" autocomplete="tel" placeholder="+254 700 000 000">
+          </label>
+          <label>
+            <span>I am a</span>
+            <select name="role">
+              <option value="client">Client</option>
+              <option value="worker">Worker</option>
+            </select>
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="new-password" minlength="6" required>
+          </label>
+          <button type="submit">Create Account</button>
+        </form>
+
+        <form class="auth-card" id="login-form" aria-label="Log in">
+          <h3>Log in</h3>
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="current-password" required>
+          </label>
+          <button type="submit">Log In</button>
+          <button class="secondary-button" id="logout-button" type="button" hidden>Log Out</button>
+          <p class="account-status" id="account-status">Not logged in.</p>
+        </form>
+
+        <form class="auth-card worker-details" id="worker-profile-form" aria-label="Worker profile" hidden>
+          <h3>Worker details</h3>
+          <label>
+            <span>Service</span>
+            <select id="worker-service-select" name="service">
+              <option value="plumber">Plumber</option>
+              <option value="mason">Mason</option>
+              <option value="electrician">Electrician</option>
+            </select>
+          </label>
+          <label>
+            <span>Location</span>
+            <input type="text" name="location_name" placeholder="Nairobi, Westlands">
+          </label>
+          <label>
+            <span>Experience years</span>
+            <input type="number" name="experience_years" min="0" value="1">
+          </label>
+          <label>
+            <span>Base price KSh</span>
+            <input type="number" name="base_price" min="0" step="100" value="1500">
+          </label>
+          <label>
+            <span>Working hours</span>
+            <input type="text" name="working_hours" placeholder="Weekdays, weekends, emergency">
+          </label>
+          <label>
+            <span>Bio</span>
+            <input type="text" name="bio" placeholder="Short description of your work">
+          </label>
+          <button type="submit">Save Worker Profile</button>
+        </form>
       </div>
     </section>
 

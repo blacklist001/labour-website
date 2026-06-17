@@ -114,6 +114,7 @@ select {
 .ghost-button,
 .search-panel button,
 .booking-card button,
+.auth-card button,
 .mini-worker button,
 .category-grid button,
 .worker-card a {
@@ -131,12 +132,14 @@ select {
 
 .solid-button,
 .search-panel button,
-.booking-card button {
+.booking-card button,
+.auth-card button {
   color: var(--white);
   background: var(--green);
 }
 
-.ghost-button {
+.ghost-button,
+.secondary-button {
   color: var(--green-dark);
   background: var(--white);
   border-color: var(--line);
@@ -355,6 +358,7 @@ input {
 .pin-three { left: 48%; bottom: 24%; background: var(--yellow); }
 
 .categories,
+.account,
 .workers,
 .booking,
 .features,
@@ -365,6 +369,54 @@ input {
 .section-heading {
   max-width: 760px;
   margin-bottom: 28px;
+}
+
+.section-copy {
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.account {
+  background: var(--white);
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.auth-card {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.auth-card h3 {
+  margin-bottom: 4px;
+}
+
+.auth-card button {
+  min-height: 48px;
+}
+
+.account-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.account-status[data-tone="success"] {
+  color: var(--green);
+}
+
+.account-status[data-tone="error"] {
+  color: var(--red);
 }
 
 .category-grid {
@@ -542,7 +594,8 @@ dd {
   }
 
   .worker-grid,
-  .feature-grid {
+  .feature-grid,
+  .account-grid {
     grid-template-columns: 1fr;
   }
 }

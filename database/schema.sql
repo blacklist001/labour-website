@@ -138,6 +138,26 @@ create policy "Worker services are public"
 on public.worker_services for select
 using (true);
 
+drop policy if exists "Workers can manage their own services" on public.worker_services;
+create policy "Workers can manage their own services"
+on public.worker_services for all
+using (
+  exists (
+    select 1
+    from public.worker_profiles wp
+    where wp.id = worker_services.worker_id
+      and wp.user_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.worker_profiles wp
+    where wp.id = worker_services.worker_id
+      and wp.user_id = auth.uid()
+  )
+);
+
 drop policy if exists "Worker photos are public" on public.worker_photos;
 create policy "Worker photos are public"
 on public.worker_photos for select

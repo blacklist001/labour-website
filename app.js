@@ -7,14 +7,29 @@ window.labourDb = db;
 const statusEl = document.querySelector("#data-status");
 const serviceSelect = document.querySelector("#service-select");
 const bookingServiceSelect = document.querySelector("#booking-service-select");
+const workerServiceSelect = document.querySelector("#worker-service-select");
 const categoryGrid = document.querySelector("#category-grid");
 const workerSearch = document.querySelector("#worker-search");
 const bookingForm = document.querySelector(".booking-card");
+const signupForm = document.querySelector("#signup-form");
+const loginForm = document.querySelector("#login-form");
+const logoutButton = document.querySelector("#logout-button");
+const accountStatusEl = document.querySelector("#account-status");
+const workerProfileForm = document.querySelector("#worker-profile-form");
+
+let currentUser = null;
+let currentProfile = null;
 
 function setStatus(message, tone = "neutral") {
   if (!statusEl) return;
   statusEl.textContent = message;
   statusEl.dataset.tone = tone;
+}
+
+function setAccountStatus(message, tone = "neutral") {
+  if (!accountStatusEl) return;
+  accountStatusEl.textContent = message;
+  accountStatusEl.dataset.tone = tone;
 }
 
 function optionFor(service) {
@@ -29,6 +44,7 @@ function renderServices(services) {
 
   serviceSelect.replaceChildren(...services.map(optionFor));
   bookingServiceSelect.replaceChildren(...services.map(optionFor));
+  workerServiceSelect?.replaceChildren(...services.map(optionFor));
 
   categoryGrid.replaceChildren(
     ...services.map((service) => {
@@ -57,6 +73,73 @@ async function loadServices() {
 
   renderServices(data || []);
   setStatus(`Connected to Supabase. Loaded ${(data || []).length} services.`, "success");
+}
+
+async function ensureProfile(user, fallback = {}) {
+  const metadata = user.user_metadata || {};
+  const profile = {
+    id: user.id,
+    full_name: fallback.full_name || metadata.full_name || user.email,
+    phone: fallback.phone || metadata.phone || null,
+    role: fallback.role || metadata.role || "client",
+    preferred_language: "en",
+  };
+
+  const { data, error } = await db
+    .from("profiles")
+    .upsert(profile, { onConflict: "id" })
+    .select()
+    .single();
+
+  if (error) throw error;
+  currentProfile = data;
+  return data;
+}
+
+async function loadCurrentProfile(user) {
+  const { data, error } = await db
+    .from("profiles")
+    .select("id, full_name, phone, role, preferred_language")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (data) {
+    currentProfile = data;
+    return data;
+  }
+
+  return ensureProfile(user);
+}
+
+function updateAuthUI() {
+  const isLoggedIn = Boolean(currentUser);
+  logoutButton.hidden = !isLoggedIn;
+  workerProfileForm.hidden = !(isLoggedIn && currentProfile?.role === "worker");
+
+  if (!isLoggedIn) {
+    setAccountStatus("Not logged in.");
+    return;
+  }
+
+  const role = currentProfile?.role || "client";
+  setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
+}
+
+async function refreshSession() {
+  const { data } = await db.auth.getSession();
+  currentUser = data.session?.user || null;
+
+  if (currentUser) {
+    try {
+      await loadCurrentProfile(currentUser);
+    } catch (error) {
+      console.error("Profile load error:", error);
+      setAccountStatus("Logged in, but profile could not be loaded.", "error");
+    }
+  }
+
+  updateAuthUI();
 }
 
 categoryGrid?.addEventListener("click", (event) => {
@@ -94,7 +177,176 @@ workerSearch?.addEventListener("submit", async (event) => {
 
 bookingForm?.addEventListener("submit", (event) => {
   event.preventDefault();
-  setStatus("Booking needs client login next. Supabase is connected; auth is the next build step.", "neutral");
+  if (!currentUser) {
+    setStatus("Please create an account or log in before requesting a job.", "error");
+    document.querySelector("#account")?.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  setStatus("Booking form is ready for the next step: selecting a real worker profile.", "neutral");
+});
+
+signupForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(signupForm);
+  const fullName = String(formData.get("full_name") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const role = String(formData.get("role") || "client");
+  const email = String(formData.get("email") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  setAccountStatus("Creating account...");
+
+  const { data, error } = await db.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        phone,
+        role,
+      },
+    },
+  });
+
+  if (error) {
+    setAccountStatus(error.message, "error");
+    return;
+  }
+
+  if (!data.session) {
+    setAccountStatus("Account created. Check your email to confirm, then log in.", "success");
+    signupForm.reset();
+    return;
+  }
+
+  currentUser = data.user;
+  try {
+    await ensureProfile(data.user, { full_name: fullName, phone, role });
+    signupForm.reset();
+    updateAuthUI();
+  } catch (profileError) {
+    console.error("Profile create error:", profileError);
+    setAccountStatus("Account created, but profile save failed. Try logging in again.", "error");
+  }
+});
+
+loginForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(loginForm);
+  const email = String(formData.get("email") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  setAccountStatus("Logging in...");
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    setAccountStatus(error.message, "error");
+    return;
+  }
+
+  currentUser = data.user;
+  try {
+    await loadCurrentProfile(data.user);
+    loginForm.reset();
+    updateAuthUI();
+  } catch (profileError) {
+    console.error("Profile load error:", profileError);
+    setAccountStatus("Logged in, but profile could not be loaded.", "error");
+  }
+});
+
+logoutButton?.addEventListener("click", async () => {
+  await db.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  updateAuthUI();
+});
+
+workerProfileForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!currentUser || currentProfile?.role !== "worker") {
+    setAccountStatus("Log in as a worker before saving worker details.", "error");
+    return;
+  }
+
+  const formData = new FormData(workerProfileForm);
+  const serviceSlug = String(formData.get("service") || "");
+  const payload = {
+    user_id: currentUser.id,
+    bio: String(formData.get("bio") || "").trim() || null,
+    location_name: String(formData.get("location_name") || "").trim() || null,
+    experience_years: Number(formData.get("experience_years") || 0),
+    base_price: Number(formData.get("base_price") || 0),
+    working_hours: String(formData.get("working_hours") || "").trim() || null,
+    availability: "available",
+    verification_status: "pending",
+  };
+
+  setAccountStatus("Saving worker profile...");
+
+  const { error } = await db
+    .from("worker_profiles")
+    .upsert(payload, { onConflict: "user_id" })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("Worker profile save error:", error);
+    setAccountStatus(error.message, "error");
+    return;
+  }
+
+  const { data: workerProfile } = await db
+    .from("worker_profiles")
+    .select("id")
+    .eq("user_id", currentUser.id)
+    .single();
+
+  const { data: service } = await db
+    .from("services")
+    .select("id")
+    .eq("slug", serviceSlug)
+    .single();
+
+  if (workerProfile?.id && service?.id) {
+    await db
+      .from("worker_services")
+      .delete()
+      .eq("worker_id", workerProfile.id);
+
+    const { error: serviceError } = await db
+      .from("worker_services")
+      .insert({
+        worker_id: workerProfile.id,
+        service_id: service.id,
+      });
+
+    if (serviceError) {
+      console.error("Worker service save error:", serviceError);
+      setAccountStatus("Worker profile saved, but service link failed. Run the latest schema.sql.", "error");
+      return;
+    }
+  }
+
+  setAccountStatus("Worker profile saved. Verification status is pending.", "success");
+});
+
+db.auth.onAuthStateChange(async (_event, session) => {
+  currentUser = session?.user || null;
+  if (currentUser) {
+    try {
+      await loadCurrentProfile(currentUser);
+    } catch (error) {
+      console.error("Auth profile sync error:", error);
+    }
+  } else {
+    currentProfile = null;
+  }
+  updateAuthUI();
 });
 
 loadServices();
+refreshSession();
