@@ -163,9 +163,10 @@ function serviceName(worker) {
 function workerCard(worker, index) {
   const article = document.createElement("article");
   const colorClass = ["plumber", "electrician", "carpenter"][index % 3];
+  const photoUrl = worker.worker_photos?.[0]?.image_url;
   article.className = "worker-card";
   article.innerHTML = `
-    <div class="worker-photo ${colorClass}"></div>
+    <div class="worker-photo ${colorClass}" ${photoUrl ? `style="background-image: linear-gradient(rgba(37,52,45,0.08), rgba(37,52,45,0.08)), url('${escapeHtml(photoUrl)}');"` : ""}></div>
     <div class="worker-body">
       <div>
         <h3>${escapeHtml(worker.display_name || "LABOUR worker")}</h3>
@@ -375,6 +376,10 @@ async function loadWorkers(serviceSlug = null) {
           name,
           slug
         )
+      ),
+      worker_photos (
+        image_url,
+        caption
       )
     `)
     .eq("verification_status", "verified")
@@ -480,6 +485,30 @@ async function updateWorkerVerification(workerId, verificationStatus) {
   setAdminStatus(`Worker ${verificationStatus}.`, "success");
   await loadPendingWorkers();
   await loadWorkers();
+}
+
+async function uploadWorkerPhoto(workerId, file) {
+  if (!file) return;
+
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-");
+  const path = `${currentUser.id}/${workerId}-${Date.now()}-${safeName}`;
+
+  const { error: uploadError } = await db.storage
+    .from("worker-photos")
+    .upload(path, file, { upsert: true });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = db.storage.from("worker-photos").getPublicUrl(path);
+  const imageUrl = data.publicUrl;
+
+  const { error: photoError } = await db.from("worker_photos").insert({
+    worker_id: workerId,
+    image_url: imageUrl,
+    caption: "Previous work",
+  });
+
+  if (photoError) throw photoError;
 }
 
 async function updateBookingStatus(bookingId, status) {
@@ -911,6 +940,18 @@ workerProfileForm?.addEventListener("submit", async (event) => {
     }
   }
 
+  const photo = formData.get("work_photo");
+  if (photo && photo.size > 0) {
+    try {
+      await uploadWorkerPhoto(workerProfile.id, photo);
+    } catch (photoError) {
+      console.error("Worker photo upload error:", photoError);
+      setAccountStatus("Profile saved, but photo upload failed. Run latest schema.sql and try again.", "error");
+      return;
+    }
+  }
+
+  workerProfileForm.reset();
   setAccountStatus("Worker profile saved. Verification status is pending.", "success");
 });
 

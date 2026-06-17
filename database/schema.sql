@@ -3,6 +3,10 @@
 
 create extension if not exists "pgcrypto";
 
+insert into storage.buckets (id, name, public)
+values ('worker-photos', 'worker-photos', true)
+on conflict (id) do nothing;
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null,
@@ -217,6 +221,31 @@ drop policy if exists "Worker photos are public" on public.worker_photos;
 create policy "Worker photos are public"
 on public.worker_photos for select
 using (true);
+
+drop policy if exists "Workers can add their own photo records" on public.worker_photos;
+create policy "Workers can add their own photo records"
+on public.worker_photos for insert
+with check (
+  exists (
+    select 1
+    from public.worker_profiles wp
+    where wp.id = worker_photos.worker_id
+      and wp.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "Worker storage photos are public" on storage.objects;
+create policy "Worker storage photos are public"
+on storage.objects for select
+using (bucket_id = 'worker-photos');
+
+drop policy if exists "Workers can upload their own storage photos" on storage.objects;
+create policy "Workers can upload their own storage photos"
+on storage.objects for insert
+with check (
+  bucket_id = 'worker-photos'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
 
 drop policy if exists "Users can read their own profile" on public.profiles;
 create policy "Users can read their own profile"
