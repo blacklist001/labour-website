@@ -362,6 +362,7 @@ input {
 .account,
 .workers,
 .booking,
+.jobs,
 .features,
 .flows {
   padding: clamp(54px, 7vw, 96px) clamp(18px, 4vw, 64px);
@@ -581,6 +582,69 @@ dd {
 
 .booking-card button {
   min-height: 48px;
+}
+
+.jobs {
+  background: var(--white);
+}
+
+.jobs-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.jobs-status {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.jobs-status[data-tone="success"] {
+  color: var(--green);
+}
+
+.jobs-status[data-tone="error"] {
+  color: var(--red);
+}
+
+.jobs-list {
+  display: grid;
+  gap: 14px;
+}
+
+.job-card {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.job-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.job-meta {
+  font-weight: 800;
+}
+
+.job-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.job-actions button {
+  min-height: 40px;
+  padding: 0 16px;
+  color: var(--white);
+  background: var(--green);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 900;
 }
 
 .feature-grid article {

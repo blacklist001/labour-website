@@ -13,6 +13,8 @@ const workerGrid = document.querySelector("#worker-grid");
 const workerSearch = document.querySelector("#worker-search");
 const bookingForm = document.querySelector("#booking-form");
 const selectedWorkerEl = document.querySelector("#selected-worker");
+const jobsStatusEl = document.querySelector("#jobs-status");
+const jobsList = document.querySelector("#jobs-list");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
 const logoutButton = document.querySelector("#logout-button");
@@ -33,6 +35,12 @@ function setAccountStatus(message, tone = "neutral") {
   if (!accountStatusEl) return;
   accountStatusEl.textContent = message;
   accountStatusEl.dataset.tone = tone;
+}
+
+function setJobsStatus(message, tone = "neutral") {
+  if (!jobsStatusEl) return;
+  jobsStatusEl.textContent = message;
+  jobsStatusEl.dataset.tone = tone;
 }
 
 function optionFor(service) {
@@ -124,6 +132,65 @@ function renderWorkers(workers) {
   workerGrid.replaceChildren(...workers.map(workerCard));
 }
 
+function statusActions(job) {
+  if (currentProfile?.role !== "worker") return "";
+
+  const nextStatuses = {
+    requested: "accepted",
+    accepted: "in_progress",
+    in_progress: "completed",
+  };
+  const next = nextStatuses[job.status];
+  if (!next) return "";
+
+  const label = {
+    accepted: "Accept",
+    in_progress: "Start",
+    completed: "Complete",
+  }[next];
+
+  return `<button type="button" data-booking-id="${job.id}" data-status="${next}">${label}</button>`;
+}
+
+function renderBookings(bookings) {
+  if (!jobsList) return;
+
+  if (!currentUser) {
+    jobsList.replaceChildren();
+    setJobsStatus("Log in to view your jobs.");
+    return;
+  }
+
+  if (!bookings.length) {
+    jobsList.innerHTML = `
+      <article class="job-card">
+        <h3>No jobs yet</h3>
+        <p>Your booking requests will appear here.</p>
+      </article>
+    `;
+    setJobsStatus("No bookings found yet.");
+    return;
+  }
+
+  jobsList.innerHTML = bookings.map((job) => `
+    <article class="job-card">
+      <div>
+        <h3>${escapeHtml(job.job_title)}</h3>
+        <p>${escapeHtml(job.job_description || "No description added.")}</p>
+      </div>
+      <dl>
+        <div><dt>Status</dt><dd>${escapeHtml(job.status)}</dd></div>
+        <div><dt>Worker</dt><dd>${escapeHtml(job.worker_profiles?.display_name || "Assigned worker")}</dd></div>
+        <div><dt>Price</dt><dd>${formatMoney(job.quoted_price)}</dd></div>
+      </dl>
+      <p class="job-meta">${escapeHtml(job.job_location || "No location")} ${job.contact_phone ? "- " + escapeHtml(job.contact_phone) : ""}</p>
+      <div class="job-actions">${statusActions(job)}</div>
+    </article>
+  `).join("");
+
+  setJobsStatus(`Loaded ${bookings.length} job${bookings.length === 1 ? "" : "s"}.`, "success");
+}
+
 async function loadServices() {
   setStatus("Connecting to LABOUR database...");
 
@@ -186,6 +253,57 @@ async function loadWorkers(serviceSlug = null) {
   return workers;
 }
 
+async function loadBookings() {
+  if (!currentUser) {
+    renderBookings([]);
+    return;
+  }
+
+  setJobsStatus("Loading jobs...");
+
+  const { data, error } = await db
+    .from("bookings")
+    .select(`
+      id,
+      job_title,
+      job_description,
+      job_location,
+      contact_phone,
+      scheduled_for,
+      status,
+      quoted_price,
+      created_at,
+      worker_profiles (
+        display_name
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Booking load error:", error);
+    setJobsStatus(error.message, "error");
+    return;
+  }
+
+  renderBookings(data || []);
+}
+
+async function updateBookingStatus(bookingId, status) {
+  setJobsStatus("Updating job...");
+  const { error } = await db
+    .from("bookings")
+    .update({ status })
+    .eq("id", bookingId);
+
+  if (error) {
+    console.error("Booking update error:", error);
+    setJobsStatus(error.message, "error");
+    return;
+  }
+
+  await loadBookings();
+}
+
 async function ensureProfile(user, fallback = {}) {
   const metadata = user.user_metadata || {};
   const profile = {
@@ -230,11 +348,13 @@ function updateAuthUI() {
 
   if (!isLoggedIn) {
     setAccountStatus("Not logged in.");
+    renderBookings([]);
     return;
   }
 
   const role = currentProfile?.role || "client";
   setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
+  loadBookings();
 }
 
 async function refreshSession() {
@@ -323,6 +443,7 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   bookingForm.reset();
   setStatus(`Booking requested with ${selectedWorker.display_name || "worker"}.`, "success");
+  loadBookings();
 });
 
 signupForm?.addEventListener("submit", async (event) => {
@@ -401,6 +522,12 @@ logoutButton?.addEventListener("click", async () => {
   currentUser = null;
   currentProfile = null;
   updateAuthUI();
+});
+
+jobsList?.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-booking-id][data-status]");
+  if (!button) return;
+  updateBookingStatus(button.dataset.bookingId, button.dataset.status);
 });
 
 workerProfileForm?.addEventListener("submit", async (event) => {
