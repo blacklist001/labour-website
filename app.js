@@ -18,6 +18,7 @@ const jobsList = document.querySelector("#jobs-list");
 const adminSection = document.querySelector("#admin");
 const adminStatusEl = document.querySelector("#admin-status");
 const adminList = document.querySelector("#admin-list");
+const themeToggle = document.querySelector("#theme-toggle");
 const chatbotToggle = document.querySelector("#chatbot-toggle");
 const chatbotPanel = document.querySelector("#chatbot-panel");
 const chatbotClose = document.querySelector("#chatbot-close");
@@ -33,6 +34,24 @@ const workerProfileForm = document.querySelector("#worker-profile-form");
 let currentUser = null;
 let currentProfile = null;
 let selectedWorker = null;
+
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem("labour-theme", theme);
+  if (themeToggle) {
+    themeToggle.textContent = theme === "dark" ? "Light" : "Dark";
+    themeToggle.setAttribute(
+      "aria-label",
+      theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+    );
+  }
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem("labour-theme");
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  setTheme(savedTheme || (prefersDark ? "dark" : "light"));
+}
 
 function withTimeout(promise, message, ms = 15000) {
   return Promise.race([
@@ -794,6 +813,11 @@ adminList?.addEventListener("click", (event) => {
   updateWorkerVerification(button.dataset.workerId, button.dataset.verification);
 });
 
+themeToggle?.addEventListener("click", () => {
+  const currentTheme = document.documentElement.dataset.theme || "light";
+  setTheme(currentTheme === "dark" ? "light" : "dark");
+});
+
 chatbotToggle?.addEventListener("click", () => {
   const isHidden = chatbotPanel.hidden;
   chatbotPanel.hidden = !isHidden;
@@ -909,6 +933,7 @@ db.auth.onAuthStateChange((_event, session) => {
   }, 0);
 });
 
+initTheme();
 loadServices();
 loadWorkers();
 refreshSession();
