@@ -28,6 +28,15 @@ let currentUser = null;
 let currentProfile = null;
 let selectedWorker = null;
 
+function withTimeout(promise, message, ms = 15000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]);
+}
+
 function setStatus(message, tone = "neutral") {
   if (!statusEl) return;
   statusEl.textContent = message;
@@ -514,6 +523,15 @@ function updateAuthUI() {
   loadPendingWorkers();
 }
 
+async function finishLogin(user) {
+  currentUser = user;
+  currentProfile = null;
+  setAccountStatus("Login successful. Loading profile...");
+
+  await loadCurrentProfile(user);
+  updateAuthUI();
+}
+
 async function refreshSession() {
   const { data } = await db.auth.getSession();
   currentUser = data.session?.user || null;
@@ -653,24 +671,29 @@ loginForm?.addEventListener("submit", async (event) => {
   const formData = new FormData(loginForm);
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
+  const submitButton = loginForm.querySelector('button[type="submit"]');
 
   setAccountStatus("Logging in...");
+  submitButton.disabled = true;
 
-  const { data, error } = await db.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    setAccountStatus(error.message, "error");
-    return;
-  }
-
-  currentUser = data.user;
   try {
-    await loadCurrentProfile(data.user);
+    const { data, error } = await withTimeout(
+      db.auth.signInWithPassword({ email, password }),
+      "Login is taking too long. Check your internet connection and try again."
+    );
+
+    if (error) {
+      setAccountStatus(error.message, "error");
+      return;
+    }
+
+    await finishLogin(data.user);
     loginForm.reset();
-    updateAuthUI();
-  } catch (profileError) {
-    console.error("Profile load error:", profileError);
-    setAccountStatus("Logged in, but profile could not be loaded.", "error");
+  } catch (loginError) {
+    console.error("Login error:", loginError);
+    setAccountStatus(loginError.message || "Login failed. Try again.", "error");
+  } finally {
+    submitButton.disabled = false;
   }
 });
 
@@ -772,18 +795,23 @@ workerProfileForm?.addEventListener("submit", async (event) => {
   setAccountStatus("Worker profile saved. Verification status is pending.", "success");
 });
 
-db.auth.onAuthStateChange(async (_event, session) => {
+db.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user || null;
-  if (currentUser) {
+  if (!currentUser) {
+    currentProfile = null;
+    updateAuthUI();
+    return;
+  }
+
+  setTimeout(async () => {
     try {
       await loadCurrentProfile(currentUser);
+      updateAuthUI();
     } catch (error) {
       console.error("Auth profile sync error:", error);
+      setAccountStatus("Logged in, but profile could not be loaded.", "error");
     }
-  } else {
-    currentProfile = null;
-  }
-  updateAuthUI();
+  }, 0);
 });
 
 loadServices();
