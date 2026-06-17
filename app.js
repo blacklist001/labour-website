@@ -152,6 +152,41 @@ function statusActions(job) {
   return `<button type="button" data-booking-id="${job.id}" data-status="${next}">${label}</button>`;
 }
 
+function reviewForm(job) {
+  const alreadyReviewed = job.reviews?.length > 0;
+  const canReview =
+    currentProfile?.role === "client" &&
+    job.client_id === currentUser?.id &&
+    job.status === "completed" &&
+    !alreadyReviewed;
+
+  if (alreadyReviewed) {
+    return `<p class="review-note">Reviewed: ${Number(job.reviews[0].rating)} / 5</p>`;
+  }
+
+  if (!canReview) return "";
+
+  return `
+    <form class="review-form" data-booking-id="${job.id}" data-worker-id="${job.worker_id}">
+      <label>
+        <span>Rating</span>
+        <select name="rating">
+          <option value="5">5 - Excellent</option>
+          <option value="4">4 - Good</option>
+          <option value="3">3 - Okay</option>
+          <option value="2">2 - Poor</option>
+          <option value="1">1 - Bad</option>
+        </select>
+      </label>
+      <label>
+        <span>Review</span>
+        <input type="text" name="comment" placeholder="How was the work?">
+      </label>
+      <button type="submit">Submit Review</button>
+    </form>
+  `;
+}
+
 function renderBookings(bookings) {
   if (!jobsList) return;
 
@@ -185,6 +220,7 @@ function renderBookings(bookings) {
       </dl>
       <p class="job-meta">${escapeHtml(job.job_location || "No location")} ${job.contact_phone ? "- " + escapeHtml(job.contact_phone) : ""}</p>
       <div class="job-actions">${statusActions(job)}</div>
+      ${reviewForm(job)}
     </article>
   `).join("");
 
@@ -265,6 +301,8 @@ async function loadBookings() {
     .from("bookings")
     .select(`
       id,
+      client_id,
+      worker_id,
       job_title,
       job_description,
       job_location,
@@ -275,6 +313,10 @@ async function loadBookings() {
       created_at,
       worker_profiles (
         display_name
+      ),
+      reviews (
+        rating,
+        comment
       )
     `)
     .order("created_at", { ascending: false });
@@ -302,6 +344,31 @@ async function updateBookingStatus(bookingId, status) {
   }
 
   await loadBookings();
+}
+
+async function submitReview(form) {
+  const formData = new FormData(form);
+  const payload = {
+    booking_id: form.dataset.bookingId,
+    worker_id: form.dataset.workerId,
+    client_id: currentUser.id,
+    rating: Number(formData.get("rating")),
+    comment: String(formData.get("comment") || "").trim() || null,
+  };
+
+  setJobsStatus("Submitting review...");
+
+  const { error } = await db.from("reviews").insert(payload);
+
+  if (error) {
+    console.error("Review submit error:", error);
+    setJobsStatus(error.message, "error");
+    return;
+  }
+
+  setJobsStatus("Review submitted. Worker rating updated.", "success");
+  await loadBookings();
+  await loadWorkers();
 }
 
 async function ensureProfile(user, fallback = {}) {
@@ -528,6 +595,13 @@ jobsList?.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-booking-id][data-status]");
   if (!button) return;
   updateBookingStatus(button.dataset.bookingId, button.dataset.status);
+});
+
+jobsList?.addEventListener("submit", (event) => {
+  const form = event.target.closest(".review-form");
+  if (!form) return;
+  event.preventDefault();
+  submitReview(form);
 });
 
 workerProfileForm?.addEventListener("submit", async (event) => {

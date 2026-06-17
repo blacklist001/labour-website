@@ -127,6 +127,34 @@ create trigger set_bookings_updated_at
 before update on public.bookings
 for each row execute function public.set_updated_at();
 
+create or replace function public.refresh_worker_rating()
+returns trigger
+language plpgsql
+as '
+begin
+  update public.worker_profiles
+  set
+    rating_average = coalesce((
+      select round(avg(r.rating)::numeric, 2)
+      from public.reviews r
+      where r.worker_id = new.worker_id
+    ), 0),
+    rating_count = (
+      select count(*)
+      from public.reviews r
+      where r.worker_id = new.worker_id
+    )
+  where id = new.worker_id;
+
+  return new;
+end;
+';
+
+drop trigger if exists refresh_worker_rating_after_review on public.reviews;
+create trigger refresh_worker_rating_after_review
+after insert or update on public.reviews
+for each row execute function public.refresh_worker_rating();
+
 alter table public.profiles enable row level security;
 alter table public.services enable row level security;
 alter table public.worker_profiles enable row level security;
@@ -245,6 +273,11 @@ using (
       and wp.user_id = auth.uid()
   )
 );
+
+drop policy if exists "Reviews are public for worker cards" on public.reviews;
+create policy "Reviews are public for worker cards"
+on public.reviews for select
+using (true);
 
 drop policy if exists "Clients can review completed bookings" on public.reviews;
 create policy "Clients can review completed bookings"
