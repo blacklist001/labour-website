@@ -9,8 +9,10 @@ const serviceSelect = document.querySelector("#service-select");
 const bookingServiceSelect = document.querySelector("#booking-service-select");
 const workerServiceSelect = document.querySelector("#worker-service-select");
 const categoryGrid = document.querySelector("#category-grid");
+const workerGrid = document.querySelector("#worker-grid");
 const workerSearch = document.querySelector("#worker-search");
-const bookingForm = document.querySelector(".booking-card");
+const bookingForm = document.querySelector("#booking-form");
+const selectedWorkerEl = document.querySelector("#selected-worker");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
 const logoutButton = document.querySelector("#logout-button");
@@ -19,6 +21,7 @@ const workerProfileForm = document.querySelector("#worker-profile-form");
 
 let currentUser = null;
 let currentProfile = null;
+let selectedWorker = null;
 
 function setStatus(message, tone = "neutral") {
   if (!statusEl) return;
@@ -57,6 +60,70 @@ function renderServices(services) {
   );
 }
 
+function formatMoney(value) {
+  if (!value) return "Quote";
+  return `KSh ${Number(value).toLocaleString("en-KE")}`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function serviceName(worker) {
+  return worker.worker_services?.[0]?.services?.name || "Worker";
+}
+
+function workerCard(worker, index) {
+  const article = document.createElement("article");
+  const colorClass = ["plumber", "electrician", "carpenter"][index % 3];
+  article.className = "worker-card";
+  article.innerHTML = `
+    <div class="worker-photo ${colorClass}"></div>
+    <div class="worker-body">
+      <div>
+        <h3>${escapeHtml(worker.display_name || "LABOUR worker")}</h3>
+        <p>${escapeHtml(serviceName(worker))} - ${Number(worker.experience_years || 0)} years experience</p>
+      </div>
+      <span class="badge">${worker.verification_status === "verified" ? "Verified" : "Pending"}</span>
+      <dl>
+        <div><dt>Rating</dt><dd>${Number(worker.rating_average || 0).toFixed(1)}</dd></div>
+        <div><dt>Price</dt><dd>${formatMoney(worker.base_price)}</dd></div>
+        <div><dt>Available</dt><dd>${escapeHtml(worker.availability || "Ask")}</dd></div>
+      </dl>
+      <button type="button" data-worker-id="${worker.id}">Select Worker</button>
+    </div>
+  `;
+
+  article.querySelector("button").addEventListener("click", () => {
+    selectedWorker = worker;
+    selectedWorkerEl.textContent = `Selected ${worker.display_name || "worker"} for ${serviceName(worker)}.`;
+    bookingServiceSelect.value = worker.worker_services?.[0]?.services?.slug || bookingServiceSelect.value;
+    document.querySelector("#booking")?.scrollIntoView({ behavior: "smooth" });
+  });
+
+  return article;
+}
+
+function renderWorkers(workers) {
+  if (!workerGrid) return;
+  if (!workers.length) {
+    workerGrid.innerHTML = `
+      <article class="empty-state">
+        <h3>No verified workers yet</h3>
+        <p>Worker profiles are saved as pending first. Verify them in Supabase to show them here.</p>
+      </article>
+    `;
+    return;
+  }
+
+  workerGrid.replaceChildren(...workers.map(workerCard));
+}
+
 async function loadServices() {
   setStatus("Connecting to LABOUR database...");
 
@@ -73,6 +140,50 @@ async function loadServices() {
 
   renderServices(data || []);
   setStatus(`Connected to Supabase. Loaded ${(data || []).length} services.`, "success");
+}
+
+async function loadWorkers(serviceSlug = null) {
+  let query = db
+    .from("worker_profiles")
+    .select(`
+      id,
+      display_name,
+      phone,
+      bio,
+      location_name,
+      experience_years,
+      base_price,
+      availability,
+      verification_status,
+      rating_average,
+      rating_count,
+      worker_services (
+        services (
+          id,
+          name,
+          slug
+        )
+      )
+    `)
+    .eq("verification_status", "verified")
+    .limit(9);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Worker load error:", error);
+    setStatus("Services are connected, but worker cards could not load yet.", "error");
+    return [];
+  }
+
+  const workers = serviceSlug
+    ? (data || []).filter((worker) =>
+        worker.worker_services?.some((link) => link.services?.slug === serviceSlug)
+      )
+    : data || [];
+
+  renderWorkers(workers);
+  return workers;
 }
 
 async function ensureProfile(user, fallback = {}) {
@@ -147,6 +258,7 @@ categoryGrid?.addEventListener("click", (event) => {
   if (!button) return;
 
   serviceSelect.value = button.dataset.service;
+  loadWorkers(button.dataset.service);
   document.querySelector("#top")?.scrollIntoView({ behavior: "smooth" });
   setStatus(`Selected ${button.textContent}. Enter your location and search.`, "success");
 });
@@ -159,23 +271,12 @@ workerSearch?.addEventListener("submit", async (event) => {
 
   setStatus(`Searching ${service} workers near ${location}...`, "neutral");
 
-  const { data, error } = await db
-    .from("worker_profiles")
-    .select("id, bio, location_name, experience_years, base_price, availability, rating_average, rating_count")
-    .eq("verification_status", "verified")
-    .limit(6);
-
-  if (error) {
-    setStatus("Search connected, but worker profiles are not available yet.", "error");
-    console.error("Supabase worker search error:", error);
-    return;
-  }
-
-  const count = data?.length || 0;
+  const data = await loadWorkers(service);
+  const count = data.length;
   setStatus(count ? `Found ${count} verified workers.` : "Connected. No verified workers have been added yet.", "success");
 });
 
-bookingForm?.addEventListener("submit", (event) => {
+bookingForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!currentUser) {
     setStatus("Please create an account or log in before requesting a job.", "error");
@@ -183,7 +284,45 @@ bookingForm?.addEventListener("submit", (event) => {
     return;
   }
 
-  setStatus("Booking form is ready for the next step: selecting a real worker profile.", "neutral");
+  if (!selectedWorker) {
+    setStatus("Select a worker before requesting a job.", "error");
+    document.querySelector("#workers")?.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  const formData = new FormData(bookingForm);
+  const serviceSlug = String(formData.get("service") || "");
+  const { data: service } = await db
+    .from("services")
+    .select("id, name")
+    .eq("slug", serviceSlug)
+    .single();
+
+  const payload = {
+    client_id: currentUser.id,
+    worker_id: selectedWorker.id,
+    service_id: service?.id || null,
+    job_title: service?.name ? `${service.name} job request` : "Job request",
+    job_description: String(formData.get("job_description") || "").trim() || null,
+    job_location: String(formData.get("job_location") || "").trim() || null,
+    contact_phone: String(formData.get("contact_phone") || "").trim() || null,
+    scheduled_for: formData.get("scheduled_for") || null,
+    payment_method: "cash",
+    quoted_price: selectedWorker.base_price || null,
+  };
+
+  setStatus("Creating booking request...");
+
+  const { error } = await db.from("bookings").insert(payload);
+
+  if (error) {
+    console.error("Booking create error:", error);
+    setStatus(error.message, "error");
+    return;
+  }
+
+  bookingForm.reset();
+  setStatus(`Booking requested with ${selectedWorker.display_name || "worker"}.`, "success");
 });
 
 signupForm?.addEventListener("submit", async (event) => {
@@ -276,6 +415,8 @@ workerProfileForm?.addEventListener("submit", async (event) => {
   const serviceSlug = String(formData.get("service") || "");
   const payload = {
     user_id: currentUser.id,
+    display_name: currentProfile.full_name,
+    phone: currentProfile.phone,
     bio: String(formData.get("bio") || "").trim() || null,
     location_name: String(formData.get("location_name") || "").trim() || null,
     experience_years: Number(formData.get("experience_years") || 0),
@@ -349,4 +490,5 @@ db.auth.onAuthStateChange(async (_event, session) => {
 });
 
 loadServices();
+loadWorkers();
 refreshSession();

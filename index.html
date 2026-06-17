@@ -194,7 +194,7 @@
         <p class="eyebrow">Top rated workers</p>
         <h2 id="workers-title">Verified help with proof of work</h2>
       </div>
-      <div class="worker-grid">
+      <div class="worker-grid" id="worker-grid">
         <article class="worker-card">
           <div class="worker-photo plumber"></div>
           <div class="worker-body">
@@ -275,7 +275,8 @@
         <h2 id="booking-title">Hire with confidence</h2>
         <p>Each profile combines identity verification, job history, a gallery, ratings, chat, call, emergency availability, and English or Swahili support.</p>
       </div>
-      <form class="booking-card" aria-label="Book a worker">
+      <form class="booking-card" id="booking-form" aria-label="Book a worker">
+        <p class="selected-worker" id="selected-worker">Select a worker from the cards above.</p>
         <label>
           <span>Job type</span>
           <select id="booking-service-select" name="service">
@@ -287,11 +288,19 @@
         </label>
         <label>
           <span>Preferred time</span>
-          <input type="datetime-local">
+          <input type="datetime-local" name="scheduled_for">
         </label>
         <label>
           <span>Contact number</span>
-          <input type="tel" placeholder="+254 700 000 000">
+          <input type="tel" name="contact_phone" placeholder="+254 700 000 000">
+        </label>
+        <label>
+          <span>Job location</span>
+          <input type="text" name="job_location" placeholder="Estate, street, or landmark">
+        </label>
+        <label>
+          <span>Job details</span>
+          <input type="text" name="job_description" placeholder="Describe what you need">
         </label>
         <button type="submit">Request Job</button>
       </form>

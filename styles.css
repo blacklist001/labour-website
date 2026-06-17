@@ -117,7 +117,8 @@ select {
 .auth-card button,
 .mini-worker button,
 .category-grid button,
-.worker-card a {
+.worker-card a,
+.worker-card button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -503,6 +504,31 @@ dd {
 .worker-card a {
   color: var(--green-dark);
   background: #eef6f0;
+}
+
+.worker-card button {
+  color: var(--green-dark);
+  background: #eef6f0;
+  border-color: transparent;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  min-height: 180px;
+  padding: 24px;
+  background: var(--white);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.empty-state p,
+.selected-worker {
+  color: var(--muted);
+}
+
+.selected-worker {
+  margin: 0;
+  font-weight: 900;
 }
 
 .flows {

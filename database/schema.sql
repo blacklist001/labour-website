@@ -34,6 +34,8 @@ on conflict (slug) do nothing;
 create table if not exists public.worker_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.profiles(id) on delete cascade,
+  display_name text,
+  phone text,
   bio text,
   location_name text,
   latitude numeric(10, 7),
@@ -49,6 +51,12 @@ create table if not exists public.worker_profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.worker_profiles
+add column if not exists display_name text;
+
+alter table public.worker_profiles
+add column if not exists phone text;
 
 create table if not exists public.worker_services (
   worker_id uuid not null references public.worker_profiles(id) on delete cascade,
@@ -72,6 +80,7 @@ create table if not exists public.bookings (
   job_title text not null,
   job_description text,
   job_location text,
+  contact_phone text,
   scheduled_for timestamptz,
   status text not null default 'requested' check (status in ('requested', 'accepted', 'declined', 'in_progress', 'completed', 'cancelled')),
   payment_method text not null default 'cash' check (payment_method in ('cash', 'online')),
@@ -79,6 +88,9 @@ create table if not exists public.bookings (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.bookings
+add column if not exists contact_phone text;
 
 create table if not exists public.reviews (
   id uuid primary key default gen_random_uuid(),
