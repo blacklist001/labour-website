@@ -20,6 +20,7 @@ const adminStatusEl = document.querySelector("#admin-status");
 const adminList = document.querySelector("#admin-list");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
+const resetPasswordButton = document.querySelector("#reset-password-button");
 const logoutButton = document.querySelector("#logout-button");
 const accountStatusEl = document.querySelector("#account-status");
 const workerProfileForm = document.querySelector("#worker-profile-form");
@@ -702,6 +703,40 @@ logoutButton?.addEventListener("click", async () => {
   currentUser = null;
   currentProfile = null;
   updateAuthUI();
+});
+
+resetPasswordButton?.addEventListener("click", async () => {
+  const formData = new FormData(loginForm);
+  const email = String(formData.get("email") || "").trim();
+
+  if (!email) {
+    setAccountStatus("Enter your email first, then click Reset Password.", "error");
+    return;
+  }
+
+  setAccountStatus("Sending password reset email...");
+  resetPasswordButton.disabled = true;
+
+  try {
+    const { error } = await withTimeout(
+      db.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      }),
+      "Password reset is taking too long. Try again."
+    );
+
+    if (error) {
+      setAccountStatus(error.message, "error");
+      return;
+    }
+
+    setAccountStatus("Password reset email sent. Check your inbox.", "success");
+  } catch (error) {
+    console.error("Password reset error:", error);
+    setAccountStatus(error.message || "Password reset failed.", "error");
+  } finally {
+    resetPasswordButton.disabled = false;
+  }
 });
 
 jobsList?.addEventListener("click", (event) => {
