@@ -1,16 +1,16 @@
 :root {
-  --ink: #17201b;
-  --muted: #66746d;
-  --line: #dce5df;
-  --paper: #f8faf8;
+  --ink: #25342d;
+  --muted: #6f7f76;
+  --line: #e3ebe6;
+  --paper: #fbfcfa;
   --white: #ffffff;
-  --green: #176b46;
-  --green-dark: #0f3f2d;
-  --lime: #d7f36f;
-  --yellow: #f6c453;
-  --teal: #4eb8a3;
+  --green: #2f8f61;
+  --green-dark: #1f6d4b;
+  --lime: #e9f7af;
+  --yellow: #f8d77a;
+  --teal: #86d7c7;
   --red: #da6b55;
-  --shadow: 0 24px 70px rgba(23, 32, 27, 0.14);
+  --shadow: 0 18px 48px rgba(37, 52, 45, 0.1);
 }
 
 * {
@@ -26,7 +26,8 @@ body {
   color: var(--ink);
   background: var(--paper);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.5;
+  line-height: 1.45;
+  font-size: 15px;
 }
 
 a {
@@ -82,7 +83,7 @@ select {
 .main-nav {
   gap: 22px;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
 }
 
 .main-nav a:hover {
@@ -98,7 +99,7 @@ select {
   max-width: 760px;
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 800;
 }
 
@@ -165,7 +166,7 @@ select {
 .eyebrow {
   margin: 0 0 10px;
   color: var(--green);
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -181,27 +182,27 @@ p {
 h1 {
   max-width: 720px;
   margin-bottom: 18px;
-  font-size: clamp(3rem, 8vw, 6.7rem);
-  line-height: 0.92;
+  font-size: clamp(2.25rem, 5.8vw, 4.9rem);
+  line-height: 0.98;
   letter-spacing: 0;
 }
 
 h2 {
   margin-bottom: 14px;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1;
+  font-size: clamp(1.55rem, 3vw, 2.55rem);
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
 h3 {
   margin-bottom: 4px;
-  font-size: 1.08rem;
+  font-size: 0.98rem;
 }
 
 .hero-text {
   max-width: 650px;
   color: var(--muted);
-  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
 }
 
 .search-panel {
@@ -221,7 +222,7 @@ label {
   display: grid;
   gap: 6px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
@@ -245,11 +246,11 @@ input {
   width: min(100%, 390px);
   min-height: 560px;
   padding: 20px;
-  color: var(--white);
+  color: var(--ink);
   background:
-    linear-gradient(155deg, rgba(15, 63, 45, 0.9), rgba(23, 107, 70, 0.92)),
-    radial-gradient(circle at 20% 12%, rgba(215, 243, 111, 0.3), transparent 32%);
-  border: 10px solid #111a16;
+    linear-gradient(155deg, rgba(255, 255, 255, 0.98), rgba(235, 250, 244, 0.96)),
+    radial-gradient(circle at 20% 12%, rgba(233, 247, 175, 0.45), transparent 32%);
+  border: 10px solid #dfece5;
   border-radius: 30px;
   box-shadow: var(--shadow);
 }
@@ -290,8 +291,8 @@ input {
 
 .mini-worker span {
   display: block;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.83rem;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .mini-worker button {
@@ -336,9 +337,9 @@ input {
   margin-top: 18px;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px),
-    linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(215, 243, 111, 0.18), rgba(78, 184, 163, 0.28));
+    linear-gradient(90deg, rgba(47,143,97,0.12) 1px, transparent 1px),
+    linear-gradient(rgba(47,143,97,0.12) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(233, 247, 175, 0.35), rgba(134, 215, 199, 0.32));
   background-size: 42px 42px, 42px 42px, auto;
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 8px;
@@ -376,7 +377,7 @@ input {
 
 .section-copy {
   color: var(--muted);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .account {
@@ -410,7 +411,7 @@ input {
 .account-status {
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 800;
 }
 
@@ -481,7 +482,7 @@ input {
   color: var(--green-dark);
   background: #e8f8d1;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 900;
 }
 
@@ -494,7 +495,7 @@ dl {
 
 dt {
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 800;
 }
 
@@ -547,13 +548,13 @@ dd {
 }
 
 .flow-panel.dark {
-  color: var(--white);
-  background: var(--green-dark);
-  border-color: var(--green-dark);
+  color: var(--ink);
+  background: #f2faf5;
+  border-color: var(--line);
 }
 
 .flow-panel.dark .eyebrow {
-  color: var(--lime);
+  color: var(--green);
 }
 
 .flow-panel ol {
@@ -699,8 +700,106 @@ dd {
   justify-content: space-between;
   gap: 20px;
   padding: 28px clamp(18px, 4vw, 64px);
+  color: var(--ink);
+  background: #edf6f0;
+}
+
+.chatbot {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 50;
+}
+
+.chatbot-toggle {
+  min-height: 46px;
+  padding: 0 18px;
   color: var(--white);
-  background: var(--ink);
+  background: var(--green);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.chatbot-panel {
+  width: min(340px, calc(100vw - 36px));
+  overflow: hidden;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.chatbot-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: #edf6f0;
+}
+
+.chatbot-header span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.chatbot-header button {
+  width: 30px;
+  height: 30px;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.chatbot-messages {
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.bot-message,
+.user-message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+}
+
+.bot-message {
+  color: var(--ink);
+  background: #f3f8f5;
+}
+
+.user-message {
+  color: var(--white);
+  background: var(--green);
+  justify-self: end;
+}
+
+.chatbot-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.chatbot-form button {
+  min-height: 42px;
+  padding: 0 14px;
+  color: var(--white);
+  background: var(--green);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 900;
 }
 
 @media (max-width: 980px) {
@@ -762,6 +861,11 @@ dd {
 
   .site-footer {
     flex-direction: column;
+  }
+
+  .chatbot {
+    right: 12px;
+    bottom: 12px;
   }
 
   .review-form {

@@ -353,6 +353,27 @@
     <strong>LABOUR</strong>
     <span>www.x.com concept prototype</span>
   </footer>
+  <aside class="chatbot" id="chatbot" aria-label="LABOUR helper chat">
+    <button class="chatbot-toggle" id="chatbot-toggle" type="button" aria-expanded="false">
+      Help
+    </button>
+    <div class="chatbot-panel" id="chatbot-panel" hidden>
+      <div class="chatbot-header">
+        <div>
+          <strong>LABOUR Help</strong>
+          <span>Ask about booking, signup, jobs, or admin.</span>
+        </div>
+        <button type="button" id="chatbot-close" aria-label="Close chat">x</button>
+      </div>
+      <div class="chatbot-messages" id="chatbot-messages" aria-live="polite">
+        <p class="bot-message">Hi, I can help you use LABOUR. Try: "how to book", "worker signup", "reset password", or "admin".</p>
+      </div>
+      <form class="chatbot-form" id="chatbot-form">
+        <input type="text" name="message" placeholder="Ask for help" autocomplete="off" required>
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </aside>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>

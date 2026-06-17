@@ -18,6 +18,11 @@ const jobsList = document.querySelector("#jobs-list");
 const adminSection = document.querySelector("#admin");
 const adminStatusEl = document.querySelector("#admin-status");
 const adminList = document.querySelector("#admin-list");
+const chatbotToggle = document.querySelector("#chatbot-toggle");
+const chatbotPanel = document.querySelector("#chatbot-panel");
+const chatbotClose = document.querySelector("#chatbot-close");
+const chatbotForm = document.querySelector("#chatbot-form");
+const chatbotMessages = document.querySelector("#chatbot-messages");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
 const resetPasswordButton = document.querySelector("#reset-password-button");
@@ -99,6 +104,37 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function chatbotReply(message) {
+  const text = message.toLowerCase();
+  if (text.includes("book") || text.includes("hire")) {
+    return "To book a worker: create or log in as a client, search for a service, select a verified worker, fill the booking form, then click Request Job.";
+  }
+  if (text.includes("worker") || text.includes("register")) {
+    return "To register as a worker: create an account with role Worker, log in, fill Worker details, then wait for admin approval.";
+  }
+  if (text.includes("admin") || text.includes("approve") || text.includes("verify")) {
+    return "Admins can open the Admin section, review pending workers, then approve or reject them. Only approved workers appear in search.";
+  }
+  if (text.includes("password") || text.includes("login")) {
+    return "For login help: enter your email and password in Account. If you forgot the password, enter your email and click Reset Password.";
+  }
+  if (text.includes("job") || text.includes("status")) {
+    return "Open My Jobs to track bookings. Workers can accept, start, and complete jobs. Clients can review completed jobs.";
+  }
+  if (text.includes("review") || text.includes("rating")) {
+    return "After a worker completes a job, the client can submit a rating in My Jobs. The worker rating updates automatically.";
+  }
+  return "I can help with booking, worker signup, login, admin approval, job status, and reviews. What would you like to do?";
+}
+
+function addChatMessage(text, type = "bot") {
+  const message = document.createElement("p");
+  message.className = type === "user" ? "user-message" : "bot-message";
+  message.textContent = text;
+  chatbotMessages.append(message);
+  chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
 }
 
 function serviceName(worker) {
@@ -756,6 +792,30 @@ adminList?.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-worker-id][data-verification]");
   if (!button) return;
   updateWorkerVerification(button.dataset.workerId, button.dataset.verification);
+});
+
+chatbotToggle?.addEventListener("click", () => {
+  const isHidden = chatbotPanel.hidden;
+  chatbotPanel.hidden = !isHidden;
+  chatbotToggle.setAttribute("aria-expanded", String(isHidden));
+  chatbotToggle.hidden = isHidden;
+});
+
+chatbotClose?.addEventListener("click", () => {
+  chatbotPanel.hidden = true;
+  chatbotToggle.hidden = false;
+  chatbotToggle.setAttribute("aria-expanded", "false");
+});
+
+chatbotForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(chatbotForm);
+  const message = String(formData.get("message") || "").trim();
+  if (!message) return;
+
+  addChatMessage(message, "user");
+  chatbotForm.reset();
+  addChatMessage(chatbotReply(message), "bot");
 });
 
 workerProfileForm?.addEventListener("submit", async (event) => {
