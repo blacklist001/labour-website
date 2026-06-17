@@ -143,6 +143,26 @@
           <p class="account-status" id="account-status">Not logged in.</p>
         </form>
 
+        <form class="auth-card" id="profile-form" aria-label="Profile settings" hidden>
+          <h3>Profile settings</h3>
+          <label>
+            <span>Full name</span>
+            <input type="text" name="full_name" autocomplete="name" required>
+          </label>
+          <label>
+            <span>Phone</span>
+            <input type="tel" name="phone" autocomplete="tel" placeholder="+254 700 000 000">
+          </label>
+          <label>
+            <span>Language</span>
+            <select name="preferred_language">
+              <option value="en">English</option>
+              <option value="sw">Swahili</option>
+            </select>
+          </label>
+          <button type="submit">Save Profile</button>
+        </form>
+
         <form class="auth-card worker-details" id="worker-profile-form" aria-label="Worker profile" hidden>
           <h3>Worker details</h3>
           <label>

@@ -26,6 +26,7 @@ const chatbotForm = document.querySelector("#chatbot-form");
 const chatbotMessages = document.querySelector("#chatbot-messages");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
+const profileForm = document.querySelector("#profile-form");
 const resetPasswordButton = document.querySelector("#reset-password-button");
 const logoutButton = document.querySelector("#logout-button");
 const accountStatusEl = document.querySelector("#account-status");
@@ -592,6 +593,7 @@ async function loadCurrentProfile(user) {
 function updateAuthUI() {
   const isLoggedIn = Boolean(currentUser);
   logoutButton.hidden = !isLoggedIn;
+  profileForm.hidden = !isLoggedIn;
   workerProfileForm.hidden = !(isLoggedIn && currentProfile?.role === "worker");
   adminSection.hidden = !(isLoggedIn && currentProfile?.role === "admin");
 
@@ -604,8 +606,16 @@ function updateAuthUI() {
 
   const role = currentProfile?.role || "client";
   setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
+  hydrateProfileForm();
   loadBookings();
   loadPendingWorkers();
+}
+
+function hydrateProfileForm() {
+  if (!profileForm || !currentProfile) return;
+  profileForm.elements.full_name.value = currentProfile.full_name || "";
+  profileForm.elements.phone.value = currentProfile.phone || "";
+  profileForm.elements.preferred_language.value = currentProfile.preferred_language || "en";
 }
 
 async function finishLogin(user) {
@@ -821,6 +831,41 @@ resetPasswordButton?.addEventListener("click", async () => {
   } finally {
     resetPasswordButton.disabled = false;
   }
+});
+
+profileForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!currentUser) {
+    setAccountStatus("Log in before editing your profile.", "error");
+    return;
+  }
+
+  const formData = new FormData(profileForm);
+  const updates = {
+    full_name: String(formData.get("full_name") || "").trim(),
+    phone: String(formData.get("phone") || "").trim() || null,
+    preferred_language: String(formData.get("preferred_language") || "en"),
+  };
+
+  setAccountStatus("Saving profile...");
+
+  const { data, error } = await db
+    .from("profiles")
+    .update(updates)
+    .eq("id", currentUser.id)
+    .select("id, full_name, phone, role, preferred_language")
+    .single();
+
+  if (error) {
+    console.error("Profile update error:", error);
+    setAccountStatus(error.message, "error");
+    return;
+  }
+
+  currentProfile = data;
+  setAccountStatus("Profile updated.", "success");
+  updateAuthUI();
 });
 
 jobsList?.addEventListener("click", (event) => {
