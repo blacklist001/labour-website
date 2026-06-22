@@ -1064,15 +1064,26 @@ workerProfileForm?.addEventListener("submit", async (event) => {
 
   const formData = new FormData(workerProfileForm);
   const serviceSlug = String(formData.get("service") || "");
+  const bio = String(formData.get("bio") || "").trim();
+  const locationName = String(formData.get("location_name") || "").trim();
+  const workingHours = String(formData.get("working_hours") || "").trim();
+  const experienceYears = Number(formData.get("experience_years") || 0);
+  const basePrice = Number(formData.get("base_price") || 0);
+
+  if (!bio || !locationName || !workingHours || basePrice <= 0) {
+    setAccountStatus("Add bio, location, working hours, and a price above 0 before saving.", "error");
+    return;
+  }
+
   const payload = {
     user_id: currentUser.id,
     display_name: currentProfile.full_name,
     phone: currentProfile.phone,
-    bio: String(formData.get("bio") || "").trim() || null,
-    location_name: String(formData.get("location_name") || "").trim() || null,
-    experience_years: Number(formData.get("experience_years") || 0),
-    base_price: Number(formData.get("base_price") || 0),
-    working_hours: String(formData.get("working_hours") || "").trim() || null,
+    bio,
+    location_name: locationName,
+    experience_years: experienceYears,
+    base_price: basePrice,
+    working_hours: workingHours,
     availability: "available",
     verification_status: "pending",
   };
