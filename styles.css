@@ -903,24 +903,37 @@ dd {
   .account-grid {
     grid-template-columns: 1fr;
   }
+
+  .phone-shell {
+    width: min(100%, 360px);
+    min-height: 500px;
+  }
 }
 
 @media (max-width: 640px) {
   .site-header {
     align-items: flex-start;
     flex-direction: column;
+    gap: 12px;
+    min-height: auto;
+    padding: 12px 18px;
   }
 
   .header-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
   }
 
-  .header-actions a {
-    flex: 1;
+  .header-actions a,
+  .theme-toggle {
+    min-width: 0;
+    padding-inline: 10px;
   }
 
   .search-panel {
     grid-template-columns: 1fr;
+    box-shadow: 0 12px 30px rgba(37, 52, 45, 0.08);
   }
 
   .hero-actions {
@@ -928,12 +941,68 @@ dd {
     flex-direction: column;
   }
 
+  .hero,
+  .categories,
+  .account,
+  .workers,
+  .booking,
+  .jobs,
+  .admin,
+  .features,
+  .flows {
+    padding-inline: 18px;
+  }
+
+  .hero {
+    padding-top: 30px;
+  }
+
+  h1 {
+    font-size: clamp(2.1rem, 12vw, 3rem);
+  }
+
+  h2 {
+    font-size: clamp(1.45rem, 8vw, 2rem);
+  }
+
   .category-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .category-grid button {
+    min-height: 58px;
+  }
+
   .phone-shell {
-    min-height: 500px;
+    min-height: 430px;
+    border-width: 7px;
+    border-radius: 24px;
+  }
+
+  .map-card {
+    height: 190px;
+  }
+
+  .worker-photo {
+    height: 180px;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+  }
+
+  .worker-actions,
+  .job-actions,
+  .admin-actions {
+    flex-direction: column;
+  }
+
+  .worker-actions a,
+  .worker-actions button,
+  .job-actions button,
+  .admin-actions button {
+    width: 100%;
+    flex-basis: auto;
   }
 
   .site-footer {
@@ -943,6 +1012,10 @@ dd {
   .chatbot {
     right: 12px;
     bottom: 12px;
+  }
+
+  .chatbot-panel {
+    width: calc(100vw - 24px);
   }
 
   .review-form {
