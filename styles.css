@@ -818,6 +818,11 @@ dd {
   color: var(--muted);
 }
 
+.build-label {
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
 .chatbot {
   position: fixed;
   right: 18px;
