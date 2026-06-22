@@ -806,6 +806,15 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   const formData = new FormData(bookingForm);
   const serviceSlug = String(formData.get("service") || "");
+  const contactPhone = String(formData.get("contact_phone") || "").trim();
+  const jobLocation = String(formData.get("job_location") || "").trim();
+  const jobDescription = String(formData.get("job_description") || "").trim();
+
+  if (!contactPhone || !jobLocation || !jobDescription) {
+    setStatus("Add contact phone, job location, and job details before requesting a job.", "error");
+    return;
+  }
+
   const { data: service } = await db
     .from("services")
     .select("id, name")
@@ -817,9 +826,9 @@ bookingForm?.addEventListener("submit", async (event) => {
     worker_id: selectedWorker.id,
     service_id: service?.id || null,
     job_title: service?.name ? `${service.name} job request` : "Job request",
-    job_description: String(formData.get("job_description") || "").trim() || null,
-    job_location: String(formData.get("job_location") || "").trim() || null,
-    contact_phone: String(formData.get("contact_phone") || "").trim() || null,
+    job_description: jobDescription,
+    job_location: jobLocation,
+    contact_phone: contactPhone,
     scheduled_for: formData.get("scheduled_for") || null,
     payment_method: "cash",
     quoted_price: selectedWorker.base_price || null,
