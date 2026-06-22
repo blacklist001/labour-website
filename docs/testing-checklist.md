@@ -1,0 +1,69 @@
+# LABOUR Testing Checklist
+
+Use this checklist on the live Vercel site after each deployment.
+
+## Account
+
+- Create a client account.
+- Create a worker account.
+- Log out and log back in.
+- Use Reset Password with a real email address.
+- Edit profile name, phone, and language.
+
+## Worker Profile
+
+- Log in as a worker.
+- Save worker details with service, location, experience, price, working hours, and bio.
+- Upload a work photo.
+- Confirm the worker appears in Supabase `worker_profiles`.
+- Confirm the photo appears in Supabase Storage `worker-photos`.
+
+## Admin
+
+- Set one account role to `admin` in Supabase `profiles`.
+- Log in as admin.
+- Open the Admin section.
+- Filter Pending, Verified, Rejected, and All workers.
+- Approve a pending worker.
+- Reject a worker.
+- Set a worker back to Pending.
+
+## Client Booking
+
+- Log in as a client.
+- Search by service, including Mechanic.
+- Select a verified worker.
+- Submit a booking with phone, location, preferred time, and job details.
+- Confirm the booking appears in Supabase `bookings`.
+
+## Jobs
+
+- Log in as the client and confirm the booking appears in My Jobs.
+- Log in as the worker and confirm the assigned booking appears in My Jobs.
+- As worker, Accept the job.
+- As worker, Start the job.
+- As worker, Complete the job.
+- As client, create another booking and Cancel it.
+- As worker, create another booking flow and Decline it.
+
+## Reviews
+
+- After a job is completed, log in as the client.
+- Submit a review and rating.
+- Confirm a row appears in Supabase `reviews`.
+- Confirm `worker_profiles.rating_average` and `rating_count` update.
+
+## UI
+
+- Test on mobile width.
+- Test on desktop width.
+- Toggle Dark and Light mode.
+- Open the Help chatbot and ask about booking, worker signup, admin, password, jobs, and reviews.
+
+## Supabase Production Settings
+
+- Add your Vercel URL to Supabase Auth redirect URLs.
+- Keep email confirmation on for production.
+- Keep the service role key private.
+- Confirm Row Level Security is enabled on all public tables.
+- Run the latest `database/schema.sql` after every database-related code change.
