@@ -129,16 +129,16 @@
 
         <form class="auth-card" id="login-form" aria-label="Log in">
           <h3>Log in</h3>
-          <label>
+          <label class="login-only">
             <span>Email</span>
             <input type="email" name="email" autocomplete="email" required>
           </label>
-          <label>
+          <label class="login-only">
             <span>Password</span>
             <input type="password" name="password" autocomplete="current-password" required>
           </label>
-          <button type="submit">Log In</button>
-          <button class="secondary-button" id="reset-password-button" type="button">Reset Password</button>
+          <button class="login-only" type="submit">Log In</button>
+          <button class="secondary-button login-only" id="reset-password-button" type="button">Reset Password</button>
           <button class="secondary-button" id="logout-button" type="button" hidden>Log Out</button>
           <p class="account-status" id="account-status">Not logged in.</p>
         </form>

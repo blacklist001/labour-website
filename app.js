@@ -27,6 +27,7 @@ const chatbotForm = document.querySelector("#chatbot-form");
 const chatbotMessages = document.querySelector("#chatbot-messages");
 const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
+const loginOnlyElements = document.querySelectorAll(".login-only");
 const profileForm = document.querySelector("#profile-form");
 const resetPasswordButton = document.querySelector("#reset-password-button");
 const logoutButton = document.querySelector("#logout-button");
@@ -658,10 +659,14 @@ async function loadCurrentProfile(user) {
 
 function updateAuthUI() {
   const isLoggedIn = Boolean(currentUser);
+  signupForm.hidden = isLoggedIn;
   logoutButton.hidden = !isLoggedIn;
   profileForm.hidden = !isLoggedIn;
   workerProfileForm.hidden = !(isLoggedIn && currentProfile?.role === "worker");
   adminSection.hidden = !(isLoggedIn && currentProfile?.role === "admin");
+  loginOnlyElements.forEach((element) => {
+    element.hidden = isLoggedIn;
+  });
 
   if (!isLoggedIn) {
     setAccountStatus("Not logged in.");
