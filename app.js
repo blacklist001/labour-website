@@ -209,23 +209,32 @@ function renderWorkers(workers) {
 }
 
 function statusActions(job) {
-  if (currentProfile?.role !== "worker") return "";
+  const actions = [];
 
-  const nextStatuses = {
-    requested: "accepted",
-    accepted: "in_progress",
-    in_progress: "completed",
-  };
-  const next = nextStatuses[job.status];
-  if (!next) return "";
+  if (currentProfile?.role === "worker") {
+    if (job.status === "requested") {
+      actions.push(["accepted", "Accept"]);
+      actions.push(["declined", "Decline"]);
+    }
 
-  const label = {
-    accepted: "Accept",
-    in_progress: "Start",
-    completed: "Complete",
-  }[next];
+    if (job.status === "accepted") {
+      actions.push(["in_progress", "Start"]);
+    }
 
-  return `<button type="button" data-booking-id="${job.id}" data-status="${next}">${label}</button>`;
+    if (job.status === "in_progress") {
+      actions.push(["completed", "Complete"]);
+    }
+  }
+
+  if (currentProfile?.role === "client" && job.client_id === currentUser?.id) {
+    if (job.status === "requested" || job.status === "accepted") {
+      actions.push(["cancelled", "Cancel"]);
+    }
+  }
+
+  return actions
+    .map(([status, label]) => `<button type="button" data-booking-id="${job.id}" data-status="${status}">${label}</button>`)
+    .join("");
 }
 
 function reviewForm(job) {
