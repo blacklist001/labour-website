@@ -25,3 +25,5 @@ Run `database/schema.sql` in the Supabase SQL Editor before expecting live servi
 ## Testing
 
 Use `docs/testing-checklist.md` to test the live Vercel app before launch.
+
+Use `docs/launch-checklist.md` before sharing the production site publicly.
