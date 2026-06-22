@@ -476,6 +476,13 @@ input {
   border-color: transparent;
 }
 
+.service-count {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .worker-grid,
 .feature-grid {
   display: grid;

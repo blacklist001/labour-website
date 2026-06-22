@@ -9,6 +9,7 @@ const serviceSelect = document.querySelector("#service-select");
 const bookingServiceSelect = document.querySelector("#booking-service-select");
 const workerServiceSelect = document.querySelector("#worker-service-select");
 const categoryGrid = document.querySelector("#category-grid");
+const serviceCountEl = document.querySelector("#service-count");
 const workerGrid = document.querySelector("#worker-grid");
 const refreshWorkersButton = document.querySelector("#refresh-workers-button");
 const workerSearch = document.querySelector("#worker-search");
@@ -120,6 +121,10 @@ function renderServices(services) {
       return button;
     })
   );
+
+  if (serviceCountEl) {
+    serviceCountEl.textContent = `${services.length} services available, including ${services.map((service) => service.name).join(", ")}.`;
+  }
 }
 
 function formatMoney(value) {
