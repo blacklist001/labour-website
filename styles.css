@@ -651,6 +651,10 @@ dd {
   gap: 18px;
 }
 
+.admin-filter {
+  max-width: 260px;
+}
+
 .jobs-status,
 .admin-status {
   margin: 0;

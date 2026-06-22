@@ -357,6 +357,15 @@
         <p class="section-copy">Approve trusted workers so they can appear in search results and receive bookings.</p>
       </div>
       <div class="admin-panel">
+        <label class="admin-filter">
+          <span>Worker status</span>
+          <select id="admin-worker-filter">
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+            <option value="all">All workers</option>
+          </select>
+        </label>
         <p class="admin-status" id="admin-status">Log in as an admin to review workers.</p>
         <div class="admin-list" id="admin-list"></div>
       </div>

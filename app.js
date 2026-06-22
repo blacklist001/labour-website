@@ -16,6 +16,7 @@ const selectedWorkerEl = document.querySelector("#selected-worker");
 const jobsStatusEl = document.querySelector("#jobs-status");
 const jobsList = document.querySelector("#jobs-list");
 const adminSection = document.querySelector("#admin");
+const adminWorkerFilter = document.querySelector("#admin-worker-filter");
 const adminStatusEl = document.querySelector("#admin-status");
 const adminList = document.querySelector("#admin-list");
 const themeToggle = document.querySelector("#theme-toggle");
@@ -332,17 +333,17 @@ function renderBookings(bookings) {
   setJobsStatus(`Loaded ${bookings.length} job${bookings.length === 1 ? "" : "s"}.`, "success");
 }
 
-function renderPendingWorkers(workers) {
+function renderAdminWorkers(workers) {
   if (!adminList) return;
 
   if (!workers.length) {
     adminList.innerHTML = `
       <article class="admin-card">
-        <h3>No pending workers</h3>
-        <p>New worker registrations will appear here.</p>
+        <h3>No workers found</h3>
+        <p>Try another verification status.</p>
       </article>
     `;
-    setAdminStatus("No pending workers right now.", "success");
+    setAdminStatus("No workers found for this filter.", "success");
     return;
   }
 
@@ -358,13 +359,14 @@ function renderPendingWorkers(workers) {
         <div><dt>Status</dt><dd>${escapeHtml(worker.verification_status)}</dd></div>
       </dl>
       <div class="admin-actions">
-        <button type="button" data-worker-id="${worker.id}" data-verification="verified">Approve</button>
-        <button type="button" data-worker-id="${worker.id}" data-verification="rejected">Reject</button>
+        ${worker.verification_status !== "verified" ? `<button type="button" data-worker-id="${worker.id}" data-verification="verified">Approve</button>` : ""}
+        ${worker.verification_status !== "rejected" ? `<button type="button" data-worker-id="${worker.id}" data-verification="rejected">Reject</button>` : ""}
+        ${worker.verification_status !== "pending" ? `<button type="button" data-worker-id="${worker.id}" data-verification="pending">Set Pending</button>` : ""}
       </div>
     </article>
   `).join("");
 
-  setAdminStatus(`Loaded ${workers.length} pending worker${workers.length === 1 ? "" : "s"}.`, "success");
+  setAdminStatus(`Loaded ${workers.length} worker${workers.length === 1 ? "" : "s"}.`, "success");
 }
 
 async function loadServices() {
@@ -474,28 +476,34 @@ async function loadBookings() {
   renderBookings(data || []);
 }
 
-async function loadPendingWorkers() {
+async function loadAdminWorkers() {
   if (currentProfile?.role !== "admin") {
     adminList?.replaceChildren();
     setAdminStatus("Log in as an admin to review workers.");
     return;
   }
 
-  setAdminStatus("Loading pending workers...");
+  const status = adminWorkerFilter?.value || "pending";
+  setAdminStatus("Loading workers...");
 
-  const { data, error } = await db
+  let query = db
     .from("worker_profiles")
     .select("id, display_name, bio, location_name, base_price, verification_status, created_at")
-    .eq("verification_status", "pending")
     .order("created_at", { ascending: false });
 
+  if (status !== "all") {
+    query = query.eq("verification_status", status);
+  }
+
+  const { data, error } = await query;
+
   if (error) {
-    console.error("Pending workers load error:", error);
+    console.error("Admin workers load error:", error);
     setAdminStatus(error.message, "error");
     return;
   }
 
-  renderPendingWorkers(data || []);
+  renderAdminWorkers(data || []);
 }
 
 async function updateWorkerVerification(workerId, verificationStatus) {
@@ -513,7 +521,7 @@ async function updateWorkerVerification(workerId, verificationStatus) {
   }
 
   setAdminStatus(`Worker ${verificationStatus}.`, "success");
-  await loadPendingWorkers();
+  await loadAdminWorkers();
   await loadWorkers();
 }
 
@@ -629,7 +637,7 @@ function updateAuthUI() {
   if (!isLoggedIn) {
     setAccountStatus("Not logged in.");
     renderBookings([]);
-    loadPendingWorkers();
+    loadAdminWorkers();
     return;
   }
 
@@ -637,7 +645,7 @@ function updateAuthUI() {
   setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
   hydrateProfileForm();
   loadBookings();
-  loadPendingWorkers();
+  loadAdminWorkers();
 }
 
 function hydrateProfileForm() {
@@ -914,6 +922,10 @@ adminList?.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-worker-id][data-verification]");
   if (!button) return;
   updateWorkerVerification(button.dataset.workerId, button.dataset.verification);
+});
+
+adminWorkerFilter?.addEventListener("change", () => {
+  loadAdminWorkers();
 });
 
 themeToggle?.addEventListener("click", () => {
