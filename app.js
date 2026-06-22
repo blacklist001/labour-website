@@ -149,6 +149,15 @@ function chatbotReply(message) {
   if (text.includes("book") || text.includes("hire")) {
     return "To book a worker: create or log in as a client, search for a service, select a verified worker, fill the booking form, then click Request Job.";
   }
+  if (text.includes("mechanic") || text.includes("car") || text.includes("vehicle")) {
+    return "Mechanic is available as a service. Choose Mechanic in the service dropdown, then search for verified mechanics.";
+  }
+  if (text.includes("photo") || text.includes("upload") || text.includes("picture")) {
+    return "Workers can upload a work photo from Account > Worker details. The photo appears on worker cards after the profile is approved.";
+  }
+  if (text.includes("dark") || text.includes("light") || text.includes("theme")) {
+    return "Use the Dark or Light button in the header to switch theme. The site remembers your choice.";
+  }
   if (text.includes("worker") || text.includes("register")) {
     return "To register as a worker: create an account with role Worker, log in, fill Worker details, then wait for admin approval.";
   }
@@ -164,7 +173,10 @@ function chatbotReply(message) {
   if (text.includes("review") || text.includes("rating")) {
     return "After a worker completes a job, the client can submit a rating in My Jobs. The worker rating updates automatically.";
   }
-  return "I can help with booking, worker signup, login, admin approval, job status, and reviews. What would you like to do?";
+  if (text.includes("test") || text.includes("launch")) {
+    return "Use the testing and launch checklists in the GitHub repo docs folder to verify the app before sharing it publicly.";
+  }
+  return "I can help with booking, worker signup, mechanic services, photo uploads, login, admin approval, job status, reviews, dark mode, and launch testing. What would you like to do?";
 }
 
 function addChatMessage(text, type = "bot") {
