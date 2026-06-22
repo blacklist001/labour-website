@@ -293,6 +293,29 @@ function reviewForm(job) {
   `;
 }
 
+function jobContactDetails(job) {
+  const workerName = job.worker_profiles?.display_name || "Assigned worker";
+  const workerPhone = job.worker_profiles?.phone;
+  const clientName = job.profiles?.full_name || "Client";
+  const clientPhone = job.contact_phone || job.profiles?.phone;
+
+  if (currentProfile?.role === "worker") {
+    return `
+      <div class="job-contact">
+        <strong>Client</strong>
+        <span>${escapeHtml(clientName)}${clientPhone ? " - " + escapeHtml(clientPhone) : ""}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="job-contact">
+      <strong>Worker</strong>
+      <span>${escapeHtml(workerName)}${workerPhone ? " - " + escapeHtml(workerPhone) : ""}</span>
+    </div>
+  `;
+}
+
 function renderBookings(bookings) {
   if (!jobsList) return;
 
@@ -324,6 +347,7 @@ function renderBookings(bookings) {
         <div><dt>Worker</dt><dd>${escapeHtml(job.worker_profiles?.display_name || "Assigned worker")}</dd></div>
         <div><dt>Price</dt><dd>${formatMoney(job.quoted_price)}</dd></div>
       </dl>
+      ${jobContactDetails(job)}
       <p class="job-meta">${escapeHtml(job.job_location || "No location")} ${job.contact_phone ? "- " + escapeHtml(job.contact_phone) : ""}</p>
       <div class="job-actions">${statusActions(job)}</div>
       ${reviewForm(job)}
@@ -458,7 +482,12 @@ async function loadBookings() {
       quoted_price,
       created_at,
       worker_profiles (
-        display_name
+        display_name,
+        phone
+      ),
+      profiles (
+        full_name,
+        phone
       ),
       reviews (
         rating,

@@ -698,6 +698,24 @@ dd {
   font-weight: 800;
 }
 
+.job-contact {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--soft-bg);
+  border-radius: 8px;
+}
+
+.job-contact strong {
+  font-size: 0.78rem;
+  color: var(--green-dark);
+}
+
+.job-contact span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .job-actions,
 .admin-actions {
   display: flex;

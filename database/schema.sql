@@ -252,6 +252,20 @@ create policy "Users can read their own profile"
 on public.profiles for select
 using (id = auth.uid());
 
+drop policy if exists "Booking workers can read client profiles" on public.profiles;
+create policy "Booking workers can read client profiles"
+on public.profiles for select
+using (
+  public.is_admin()
+  or exists (
+    select 1
+    from public.bookings b
+    join public.worker_profiles wp on wp.id = b.worker_id
+    where b.client_id = profiles.id
+      and wp.user_id = auth.uid()
+  )
+);
+
 drop policy if exists "Users can create their own profile" on public.profiles;
 create policy "Users can create their own profile"
 on public.profiles for insert
