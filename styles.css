@@ -781,6 +781,15 @@ dd {
   background: var(--soft-bg);
 }
 
+.site-footer div {
+  display: grid;
+  gap: 4px;
+}
+
+.site-footer span {
+  color: var(--muted);
+}
+
 .chatbot {
   position: fixed;
   right: 18px;
