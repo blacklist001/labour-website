@@ -495,7 +495,7 @@ input {
 
 .worker-body {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   padding: 18px;
 }
 
@@ -542,6 +542,32 @@ dd {
   color: var(--green-dark);
   background: var(--soft-bg);
   border-color: transparent;
+}
+
+.worker-location,
+.worker-bio {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.worker-location {
+  font-weight: 900;
+}
+
+.worker-bio {
+  min-height: 2.5em;
+}
+
+.worker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.worker-actions a,
+.worker-actions button {
+  flex: 1 1 96px;
 }
 
 .empty-state {

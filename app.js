@@ -161,6 +161,24 @@ function serviceName(worker) {
   return worker.worker_services?.[0]?.services?.name || "Worker";
 }
 
+function phoneDigits(phone) {
+  return String(phone || "").replace(/\D/g, "");
+}
+
+function workerContactActions(worker) {
+  const digits = phoneDigits(worker.phone);
+  const phoneHref = digits ? `tel:+${digits}` : "";
+  const whatsAppHref = digits ? `https://wa.me/${digits}` : "";
+
+  return `
+    <div class="worker-actions">
+      <button class="select-worker-button" type="button" data-worker-id="${worker.id}">Select Worker</button>
+      ${digits ? `<a href="${phoneHref}">Call</a>` : ""}
+      ${digits ? `<a href="${whatsAppHref}" target="_blank" rel="noreferrer">WhatsApp</a>` : ""}
+    </div>
+  `;
+}
+
 function workerCard(worker, index) {
   const article = document.createElement("article");
   const colorClass = ["plumber", "electrician", "carpenter"][index % 3];
@@ -174,16 +192,18 @@ function workerCard(worker, index) {
         <p>${escapeHtml(serviceName(worker))} - ${Number(worker.experience_years || 0)} years experience</p>
       </div>
       <span class="badge">${worker.verification_status === "verified" ? "Verified" : "Pending"}</span>
+      <p class="worker-location">${escapeHtml(worker.location_name || "Location not added")}</p>
+      <p class="worker-bio">${escapeHtml(worker.bio || "No bio added yet.")}</p>
       <dl>
         <div><dt>Rating</dt><dd>${Number(worker.rating_average || 0).toFixed(1)}</dd></div>
         <div><dt>Price</dt><dd>${formatMoney(worker.base_price)}</dd></div>
         <div><dt>Available</dt><dd>${escapeHtml(worker.availability || "Ask")}</dd></div>
       </dl>
-      <button type="button" data-worker-id="${worker.id}">Select Worker</button>
+      ${workerContactActions(worker)}
     </div>
   `;
 
-  article.querySelector("button").addEventListener("click", () => {
+  article.querySelector(".select-worker-button").addEventListener("click", () => {
     selectedWorker = worker;
     selectedWorkerEl.textContent = `Selected ${worker.display_name || "worker"} for ${serviceName(worker)}.`;
     bookingServiceSelect.value = worker.worker_services?.[0]?.services?.slug || bookingServiceSelect.value;
