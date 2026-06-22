@@ -592,6 +592,26 @@ dd {
   color: var(--muted);
 }
 
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.empty-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  color: var(--green-dark);
+  background: var(--soft-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-weight: 900;
+}
+
 .selected-worker {
   margin: 0;
   font-weight: 900;

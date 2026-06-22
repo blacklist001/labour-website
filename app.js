@@ -237,7 +237,11 @@ function renderWorkers(workers) {
     workerGrid.innerHTML = `
       <article class="empty-state">
         <h3>No verified workers yet</h3>
-        <p>Worker profiles are saved as pending first. Verify them in Supabase to show them here.</p>
+        <p>Workers appear here after an admin approves their profile.</p>
+        <div class="empty-actions">
+          <a href="#account">Register as Worker</a>
+          <a href="#admin">Admin Review</a>
+        </div>
       </article>
     `;
     return;
@@ -346,7 +350,11 @@ function renderBookings(bookings) {
     jobsList.innerHTML = `
       <article class="job-card">
         <h3>No jobs yet</h3>
-        <p>Your booking requests will appear here.</p>
+        <p>Your booking requests will appear here after a client selects a verified worker.</p>
+        <div class="empty-actions">
+          <a href="#workers">Find Workers</a>
+          <a href="#booking">Request Job</a>
+        </div>
       </article>
     `;
     setJobsStatus("No bookings found yet.");
