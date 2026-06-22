@@ -10,6 +10,7 @@ const bookingServiceSelect = document.querySelector("#booking-service-select");
 const workerServiceSelect = document.querySelector("#worker-service-select");
 const categoryGrid = document.querySelector("#category-grid");
 const workerGrid = document.querySelector("#worker-grid");
+const refreshWorkersButton = document.querySelector("#refresh-workers-button");
 const workerSearch = document.querySelector("#worker-search");
 const bookingForm = document.querySelector("#booking-form");
 const selectedWorkerEl = document.querySelector("#selected-worker");
@@ -754,6 +755,14 @@ workerSearch?.addEventListener("submit", async (event) => {
   const data = await loadWorkers(service);
   const count = data.length;
   setStatus(count ? `Found ${count} verified workers.` : "Connected. No verified workers have been added yet.", "success");
+});
+
+refreshWorkersButton?.addEventListener("click", async () => {
+  const service = serviceSelect.value || null;
+  clearSelectedWorker();
+  setStatus("Refreshing workers...", "neutral");
+  const data = await loadWorkers(service);
+  setStatus(data.length ? `Refreshed ${data.length} verified workers.` : "No verified workers found for this service.", "success");
 });
 
 bookingForm?.addEventListener("submit", async (event) => {
