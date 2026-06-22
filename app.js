@@ -126,6 +126,14 @@ function formatMoney(value) {
   return `KSh ${Number(value).toLocaleString("en-KE")}`;
 }
 
+function formatDateTime(value) {
+  if (!value) return "Not set";
+  return new Intl.DateTimeFormat("en-KE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -354,6 +362,8 @@ function renderBookings(bookings) {
         <div><dt>Status</dt><dd>${escapeHtml(job.status)}</dd></div>
         <div><dt>Worker</dt><dd>${escapeHtml(job.worker_profiles?.display_name || "Assigned worker")}</dd></div>
         <div><dt>Price</dt><dd>${formatMoney(job.quoted_price)}</dd></div>
+        <div><dt>Preferred</dt><dd>${escapeHtml(formatDateTime(job.scheduled_for))}</dd></div>
+        <div><dt>Requested</dt><dd>${escapeHtml(formatDateTime(job.created_at))}</dd></div>
       </dl>
       ${jobContactDetails(job)}
       <p class="job-meta">${escapeHtml(job.job_location || "No location")} ${job.contact_phone ? "- " + escapeHtml(job.contact_phone) : ""}</p>
