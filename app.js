@@ -77,6 +77,13 @@ function setAccountStatus(message, tone = "neutral") {
   accountStatusEl.dataset.tone = tone;
 }
 
+function clearSelectedWorker() {
+  selectedWorker = null;
+  if (selectedWorkerEl) {
+    selectedWorkerEl.textContent = "Select a worker from the cards above.";
+  }
+}
+
 function setJobsStatus(message, tone = "neutral") {
   if (!jobsStatusEl) return;
   jobsStatusEl.textContent = message;
@@ -719,6 +726,7 @@ categoryGrid?.addEventListener("click", (event) => {
   if (!button) return;
 
   serviceSelect.value = button.dataset.service;
+  clearSelectedWorker();
   loadWorkers(button.dataset.service);
   document.querySelector("#top")?.scrollIntoView({ behavior: "smooth" });
   setStatus(`Selected ${button.textContent}. Enter your location and search.`, "success");
@@ -730,6 +738,7 @@ workerSearch?.addEventListener("submit", async (event) => {
   const service = formData.get("service");
   const location = formData.get("location") || "your area";
 
+  clearSelectedWorker();
   setStatus(`Searching ${service} workers near ${location}...`, "neutral");
 
   const data = await loadWorkers(service);
@@ -784,6 +793,7 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   bookingForm.reset();
   setStatus(`Booking requested with ${selectedWorker.display_name || "worker"}.`, "success");
+  clearSelectedWorker();
   loadBookings();
 });
 
