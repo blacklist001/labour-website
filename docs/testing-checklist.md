@@ -8,6 +8,7 @@ Use this checklist on the live Vercel site after each deployment.
 - Create a worker account.
 - Log out and log back in.
 - Use Reset Password with a real email address.
+- Open the password reset email, return to the site, and set a new password.
 - Edit profile name, phone, and language.
 
 ## Worker Profile

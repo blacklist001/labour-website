@@ -31,6 +31,7 @@ const signupForm = document.querySelector("#signup-form");
 const loginForm = document.querySelector("#login-form");
 const loginOnlyElements = document.querySelectorAll(".login-only");
 const profileForm = document.querySelector("#profile-form");
+const passwordUpdateForm = document.querySelector("#password-update-form");
 const resetPasswordButton = document.querySelector("#reset-password-button");
 const logoutButton = document.querySelector("#logout-button");
 const accountStatusEl = document.querySelector("#account-status");
@@ -39,6 +40,7 @@ const workerProfileForm = document.querySelector("#worker-profile-form");
 let currentUser = null;
 let currentProfile = null;
 let selectedWorker = null;
+let isPasswordRecovery = false;
 
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -880,6 +882,7 @@ function updateAuthUI() {
   signupForm.hidden = isLoggedIn;
   logoutButton.hidden = !isLoggedIn;
   profileForm.hidden = !isLoggedIn;
+  passwordUpdateForm.hidden = !isPasswordRecovery;
   workerProfileForm.hidden = !(isLoggedIn && currentProfile?.role === "worker");
   adminSection.hidden = !(isLoggedIn && currentProfile?.role === "admin");
   loginOnlyElements.forEach((element) => {
@@ -894,7 +897,11 @@ function updateAuthUI() {
   }
 
   const role = currentProfile?.role || "client";
-  setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
+  if (isPasswordRecovery) {
+    setAccountStatus("Enter a new password to finish recovery.", "success");
+  } else {
+    setAccountStatus(`Logged in as ${currentProfile?.full_name || currentUser.email} (${role}).`, "success");
+  }
   hydrateProfileForm();
   loadBookings();
   loadAdminWorkers();
@@ -1152,6 +1159,33 @@ resetPasswordButton?.addEventListener("click", async () => {
   }
 });
 
+passwordUpdateForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(passwordUpdateForm);
+  const password = String(formData.get("password") || "");
+  const confirmPassword = String(formData.get("confirm_password") || "");
+
+  if (password !== confirmPassword) {
+    setAccountStatus("Passwords do not match.", "error");
+    return;
+  }
+
+  setAccountStatus("Updating password...");
+
+  const { error } = await db.auth.updateUser({ password });
+
+  if (error) {
+    setAccountStatus(error.message, "error");
+    return;
+  }
+
+  isPasswordRecovery = false;
+  passwordUpdateForm.reset();
+  setAccountStatus("Password updated. You can now use the new password.", "success");
+  updateAuthUI();
+});
+
 profileForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -1352,6 +1386,12 @@ workerProfileForm?.addEventListener("submit", async (event) => {
 });
 
 db.auth.onAuthStateChange((_event, session) => {
+  if (_event === "PASSWORD_RECOVERY") {
+    isPasswordRecovery = true;
+    document.querySelector("#account")?.scrollIntoView({ behavior: "smooth" });
+    setAccountStatus("Enter a new password to finish recovery.", "success");
+  }
+
   currentUser = session?.user || null;
   if (!currentUser) {
     currentProfile = null;

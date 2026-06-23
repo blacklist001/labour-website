@@ -163,6 +163,19 @@
           <button type="submit">Save Profile</button>
         </form>
 
+        <form class="auth-card" id="password-update-form" aria-label="Set new password" hidden>
+          <h3>Set new password</h3>
+          <label>
+            <span>New password</span>
+            <input type="password" name="password" autocomplete="new-password" minlength="6" required>
+          </label>
+          <label>
+            <span>Confirm password</span>
+            <input type="password" name="confirm_password" autocomplete="new-password" minlength="6" required>
+          </label>
+          <button type="submit">Update Password</button>
+        </form>
+
         <form class="auth-card worker-details" id="worker-profile-form" aria-label="Worker profile" hidden>
           <h3>Worker details</h3>
           <label>
