@@ -724,6 +724,51 @@ async function markBookingPaid(bookingId) {
   await loadBookings();
 }
 
+async function getBookingPaymentStatus(bookingId) {
+  const { data, error } = await db
+    .from("bookings")
+    .select("payment_status, payment_reference, mpesa_result_description")
+    .eq("id", bookingId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function watchMpesaPayment(bookingId, maxChecks = 12) {
+  for (let check = 0; check < maxChecks; check += 1) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 5000);
+    });
+
+    try {
+      const payment = await getBookingPaymentStatus(bookingId);
+
+      if (payment.payment_status === "paid") {
+        setJobsStatus(
+          payment.payment_reference
+            ? `M-Pesa payment confirmed. Reference: ${payment.payment_reference}.`
+            : "M-Pesa payment confirmed.",
+          "success"
+        );
+        await loadBookings();
+        return;
+      }
+
+      if (payment.payment_status === "failed") {
+        setJobsStatus(payment.mpesa_result_description || "M-Pesa payment failed.", "error");
+        await loadBookings();
+        return;
+      }
+    } catch (error) {
+      console.error("M-Pesa payment watch error:", error);
+    }
+  }
+
+  setJobsStatus("M-Pesa payment is still pending. Refresh My Jobs in a moment.", "neutral");
+  await loadBookings();
+}
+
 async function startMpesaPayment(bookingId, phone, amount) {
   setJobsStatus("Sending M-Pesa prompt...");
 
@@ -756,6 +801,7 @@ async function startMpesaPayment(bookingId, phone, amount) {
 
     setJobsStatus(result.message || "Check your phone and enter your M-Pesa PIN.", "success");
     await loadBookings();
+    watchMpesaPayment(bookingId);
   } catch (error) {
     console.error("M-Pesa payment error:", error);
     setJobsStatus(error.message || "M-Pesa payment failed.", "error");
