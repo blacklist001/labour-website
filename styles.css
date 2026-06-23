@@ -738,6 +738,45 @@ dd {
   color: var(--green-dark) !important;
 }
 
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  color: var(--ink);
+  background: var(--soft-bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.status-badge[data-status="accepted"],
+.status-badge[data-status="in_progress"],
+.status-badge[data-status="pending"] {
+  color: #755200;
+  background: #fff4ca;
+  border-color: #ead07d;
+}
+
+.status-badge[data-status="completed"],
+.status-badge[data-status="paid"],
+.status-badge[data-status="verified"] {
+  color: var(--green-dark);
+  background: #dff2e5;
+  border-color: #9fcdaa;
+}
+
+.status-badge[data-status="declined"],
+.status-badge[data-status="cancelled"],
+.status-badge[data-status="failed"] {
+  color: var(--red);
+  background: #ffe5e1;
+  border-color: #f0afa6;
+}
+
 .job-contact {
   display: grid;
   gap: 2px;

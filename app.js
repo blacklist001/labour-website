@@ -160,6 +160,11 @@ function formatPaymentStatus(value) {
   return statuses[value] || "Unpaid";
 }
 
+function statusBadge(value, type = "job") {
+  const label = type === "payment" ? formatPaymentStatus(value) : String(value || "requested").replaceAll("_", " ");
+  return `<span class="status-badge" data-status="${escapeHtml(value || "unknown")}">${escapeHtml(label)}</span>`;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -436,11 +441,11 @@ function renderBookings(bookings) {
         <p>${escapeHtml(job.job_description || "No description added.")}</p>
       </div>
       <dl>
-        <div><dt>Status</dt><dd>${escapeHtml(job.status)}</dd></div>
+        <div><dt>Status</dt><dd>${statusBadge(job.status)}</dd></div>
         <div><dt>Worker</dt><dd>${escapeHtml(job.worker_profiles?.display_name || "Assigned worker")}</dd></div>
         <div><dt>Price</dt><dd>${formatMoney(job.quoted_price)}</dd></div>
         <div><dt>Payment</dt><dd>${escapeHtml(formatPaymentMethod(job.payment_method))}</dd></div>
-        <div><dt>Pay status</dt><dd>${escapeHtml(formatPaymentStatus(job.payment_status))}</dd></div>
+        <div><dt>Pay status</dt><dd>${statusBadge(job.payment_status, "payment")}</dd></div>
         <div><dt>Preferred</dt><dd>${escapeHtml(formatDateTime(job.scheduled_for))}</dd></div>
         <div><dt>Requested</dt><dd>${escapeHtml(formatDateTime(job.created_at))}</dd></div>
       </dl>
