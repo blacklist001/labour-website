@@ -8,6 +8,7 @@ Use this before sharing the website publicly.
 - Open the production URL and test the homepage.
 - Add a custom domain if needed.
 - Confirm HTTPS is active.
+- Add the official support email or phone number when it is ready.
 
 ## Supabase Auth
 
