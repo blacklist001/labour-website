@@ -36,6 +36,16 @@ Use this checklist on the live Vercel site after each deployment.
 - Submit a booking with phone, location, preferred time, and job details.
 - Confirm the booking appears in Supabase `bookings`.
 
+## Payments
+
+- Open `https://your-vercel-domain.vercel.app/api/payment-health` and confirm `ok` is `true`.
+- Create a booking with Cash and confirm the job shows payment status `Unpaid`.
+- Click Mark Paid on the cash booking and confirm payment status changes to `Paid`.
+- Create a booking with M-Pesa and confirm the phone receives an STK Push.
+- Complete the M-Pesa prompt on the phone.
+- Confirm the job changes to payment status `Paid` and shows an M-Pesa reference.
+- Confirm Supabase `bookings` has `checkout_request_id`, `payment_reference`, and `mpesa_result_description`.
+
 ## Jobs
 
 - Log in as the client and confirm the booking appears in My Jobs.

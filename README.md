@@ -42,6 +42,8 @@ MPESA_CALLBACK_URL=https://your-vercel-domain.vercel.app/api/mpesa-callback
 
 For production, set `MPESA_ENV=production`, use your real shortcode/passkey, and set the callback URL to the final live domain.
 
+After deployment, open `/api/payment-health` on your Vercel domain to confirm the server payment variables are configured. It only returns true/false checks and never returns secret values.
+
 ## Testing
 
 Use `docs/testing-checklist.md` to test the live Vercel app before launch.
