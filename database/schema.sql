@@ -91,6 +91,13 @@ create table if not exists public.bookings (
   payment_method text not null default 'cash',
   payment_status text not null default 'unpaid',
   payment_reference text,
+  merchant_request_id text,
+  checkout_request_id text,
+  mpesa_result_code integer,
+  mpesa_result_description text,
+  mpesa_amount numeric(12, 2),
+  mpesa_phone text,
+  mpesa_paid_at text,
   quoted_price numeric(12, 2) check (quoted_price >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -104,6 +111,27 @@ add column if not exists payment_status text not null default 'unpaid';
 
 alter table public.bookings
 add column if not exists payment_reference text;
+
+alter table public.bookings
+add column if not exists merchant_request_id text;
+
+alter table public.bookings
+add column if not exists checkout_request_id text;
+
+alter table public.bookings
+add column if not exists mpesa_result_code integer;
+
+alter table public.bookings
+add column if not exists mpesa_result_description text;
+
+alter table public.bookings
+add column if not exists mpesa_amount numeric(12, 2);
+
+alter table public.bookings
+add column if not exists mpesa_phone text;
+
+alter table public.bookings
+add column if not exists mpesa_paid_at text;
 
 update public.bookings
 set payment_method = 'mpesa'

@@ -22,7 +22,25 @@ The frontend connects to Supabase in `app.js` using the public project URL and a
 
 Run `database/schema.sql` in the Supabase SQL Editor before expecting live services, worker profiles, bookings, and reviews to work.
 
-Bookings include payment method, payment status, and payment reference fields. The current frontend tracks Cash, M-Pesa, and Card choices, but it does not process real payments yet.
+Bookings include payment method, payment status, and payment reference fields. Cash and Card can be tracked manually. M-Pesa uses Vercel API functions for Daraja STK Push when the environment variables below are configured.
+
+## M-Pesa Daraja Setup
+
+Add these environment variables in Vercel project settings:
+
+```text
+SUPABASE_URL=https://ubuftuivhfxzbzcgrkfq.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+MPESA_ENV=sandbox
+MPESA_CONSUMER_KEY=your-daraja-consumer-key
+MPESA_CONSUMER_SECRET=your-daraja-consumer-secret
+MPESA_SHORTCODE=your-paybill-or-sandbox-shortcode
+MPESA_PASSKEY=your-daraja-passkey
+MPESA_CALLBACK_URL=https://your-vercel-domain.vercel.app/api/mpesa-callback
+```
+
+For production, set `MPESA_ENV=production`, use your real shortcode/passkey, and set the callback URL to the final live domain.
 
 ## Testing
 

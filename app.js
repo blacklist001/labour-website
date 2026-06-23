@@ -196,7 +196,7 @@ function chatbotReply(message) {
     return "Open My Jobs to track bookings. Workers can accept, start, and complete jobs. Clients can review completed jobs.";
   }
   if (text.includes("pay") || text.includes("mpesa") || text.includes("m-pesa") || text.includes("card") || text.includes("cash")) {
-    return "Clients can choose Cash, M-Pesa, or Card when requesting a job. Payment status appears in My Jobs. Live payment processing is the next gateway integration step.";
+    return "Clients can choose Cash, M-Pesa, or Card when requesting a job. M-Pesa can send an STK Push after the Daraja keys are added in Vercel.";
   }
   if (text.includes("review") || text.includes("rating")) {
     return "After a worker completes a job, the client can submit a rating in My Jobs. The worker rating updates automatically.";
@@ -323,12 +323,28 @@ function paymentActions(job) {
   const canMarkPaid =
     currentProfile?.role === "client" &&
     job.client_id === currentUser?.id &&
+    job.payment_method !== "mpesa" &&
     job.payment_status !== "paid" &&
     !["declined", "cancelled"].includes(job.status);
 
-  if (!canMarkPaid) return "";
+  const canStartMpesa =
+    currentProfile?.role === "client" &&
+    job.client_id === currentUser?.id &&
+    job.payment_method === "mpesa" &&
+    job.payment_status !== "paid" &&
+    !["declined", "cancelled"].includes(job.status);
 
-  return `<button type="button" data-payment-booking-id="${job.id}">Mark Paid</button>`;
+  const actions = [];
+
+  if (canMarkPaid) {
+    actions.push(`<button type="button" data-payment-booking-id="${job.id}">Mark Paid</button>`);
+  }
+
+  if (canStartMpesa) {
+    actions.push(`<button type="button" data-mpesa-booking-id="${job.id}" data-phone="${escapeHtml(job.contact_phone || "")}" data-amount="${Number(job.quoted_price || 1)}">Pay with M-Pesa</button>`);
+  }
+
+  return actions.join("");
 }
 
 function reviewForm(job) {
@@ -430,6 +446,7 @@ function renderBookings(bookings) {
       </dl>
       ${jobContactDetails(job)}
       ${job.payment_reference ? `<p class="payment-reference">Payment ref: ${escapeHtml(job.payment_reference)}</p>` : ""}
+      ${job.mpesa_result_description ? `<p class="payment-reference">M-Pesa: ${escapeHtml(job.mpesa_result_description)}</p>` : ""}
       <p class="job-meta">${escapeHtml(job.job_location || "No location")} ${job.contact_phone ? "- " + escapeHtml(job.contact_phone) : ""}</p>
       <div class="job-actions">${statusActions(job)}${paymentActions(job)}</div>
       ${reviewForm(job)}
@@ -564,6 +581,13 @@ async function loadBookings() {
       payment_method,
       payment_status,
       payment_reference,
+      checkout_request_id,
+      merchant_request_id,
+      mpesa_result_code,
+      mpesa_result_description,
+      mpesa_amount,
+      mpesa_phone,
+      mpesa_paid_at,
       quoted_price,
       created_at,
       worker_profiles (
@@ -698,6 +722,44 @@ async function markBookingPaid(bookingId) {
 
   setJobsStatus("Payment marked as paid.", "success");
   await loadBookings();
+}
+
+async function startMpesaPayment(bookingId, phone, amount) {
+  setJobsStatus("Sending M-Pesa prompt...");
+
+  const { data: sessionData } = await db.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+
+  if (!accessToken) {
+    setJobsStatus("Log in again before starting M-Pesa payment.", "error");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/mpesa-stk", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        booking_id: bookingId,
+        phone,
+        amount,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "M-Pesa payment could not start.");
+    }
+
+    setJobsStatus(result.message || "Check your phone and enter your M-Pesa PIN.", "success");
+    await loadBookings();
+  } catch (error) {
+    console.error("M-Pesa payment error:", error);
+    setJobsStatus(error.message || "M-Pesa payment failed.", "error");
+  }
 }
 
 async function submitReview(form) {
@@ -900,7 +962,11 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   setStatus("Creating booking request...");
 
-  const { error } = await db.from("bookings").insert(payload);
+  const { data: booking, error } = await db
+    .from("bookings")
+    .insert(payload)
+    .select("id, contact_phone, quoted_price, payment_method")
+    .single();
 
   if (error) {
     console.error("Booking create error:", error);
@@ -911,7 +977,11 @@ bookingForm?.addEventListener("submit", async (event) => {
   bookingForm.reset();
   setStatus(`Booking requested with ${selectedWorker.display_name || "worker"}.`, "success");
   clearSelectedWorker();
-  loadBookings();
+  await loadBookings();
+
+  if (booking?.payment_method === "mpesa") {
+    await startMpesaPayment(booking.id, booking.contact_phone, booking.quoted_price);
+  }
 });
 
 signupForm?.addEventListener("submit", async (event) => {
@@ -1076,6 +1146,16 @@ jobsList?.addEventListener("click", (event) => {
   const paymentButton = event.target.closest("button[data-payment-booking-id]");
   if (paymentButton) {
     markBookingPaid(paymentButton.dataset.paymentBookingId);
+    return;
+  }
+
+  const mpesaButton = event.target.closest("button[data-mpesa-booking-id]");
+  if (mpesaButton) {
+    startMpesaPayment(
+      mpesaButton.dataset.mpesaBookingId,
+      mpesaButton.dataset.phone,
+      mpesaButton.dataset.amount
+    );
   }
 });
 
