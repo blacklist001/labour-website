@@ -88,7 +88,9 @@ create table if not exists public.bookings (
   contact_phone text,
   scheduled_for timestamptz,
   status text not null default 'requested' check (status in ('requested', 'accepted', 'declined', 'in_progress', 'completed', 'cancelled')),
-  payment_method text not null default 'cash' check (payment_method in ('cash', 'online')),
+  payment_method text not null default 'cash',
+  payment_status text not null default 'unpaid',
+  payment_reference text,
   quoted_price numeric(12, 2) check (quoted_price >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -96,6 +98,30 @@ create table if not exists public.bookings (
 
 alter table public.bookings
 add column if not exists contact_phone text;
+
+alter table public.bookings
+add column if not exists payment_status text not null default 'unpaid';
+
+alter table public.bookings
+add column if not exists payment_reference text;
+
+update public.bookings
+set payment_method = 'mpesa'
+where payment_method = 'online';
+
+alter table public.bookings
+drop constraint if exists bookings_payment_method_check;
+
+alter table public.bookings
+add constraint bookings_payment_method_check
+check (payment_method in ('cash', 'mpesa', 'card'));
+
+alter table public.bookings
+drop constraint if exists bookings_payment_status_check;
+
+alter table public.bookings
+add constraint bookings_payment_status_check
+check (payment_status in ('unpaid', 'pending', 'paid', 'failed', 'refunded'));
 
 create table if not exists public.reviews (
   id uuid primary key default gen_random_uuid(),

@@ -22,6 +22,8 @@ The frontend connects to Supabase in `app.js` using the public project URL and a
 
 Run `database/schema.sql` in the Supabase SQL Editor before expecting live services, worker profiles, bookings, and reviews to work.
 
+Bookings include payment method, payment status, and payment reference fields. The current frontend tracks Cash, M-Pesa, and Card choices, but it does not process real payments yet.
+
 ## Testing
 
 Use `docs/testing-checklist.md` to test the live Vercel app before launch.

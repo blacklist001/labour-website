@@ -140,6 +140,26 @@ function formatDateTime(value) {
   }).format(new Date(value));
 }
 
+function formatPaymentMethod(value) {
+  const methods = {
+    cash: "Cash",
+    mpesa: "M-Pesa",
+    card: "Card",
+  };
+  return methods[value] || "Cash";
+}
+
+function formatPaymentStatus(value) {
+  const statuses = {
+    unpaid: "Unpaid",
+    pending: "Pending",
+    paid: "Paid",
+    failed: "Failed",
+    refunded: "Refunded",
+  };
+  return statuses[value] || "Unpaid";
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -174,6 +194,9 @@ function chatbotReply(message) {
   }
   if (text.includes("job") || text.includes("status")) {
     return "Open My Jobs to track bookings. Workers can accept, start, and complete jobs. Clients can review completed jobs.";
+  }
+  if (text.includes("pay") || text.includes("mpesa") || text.includes("m-pesa") || text.includes("card") || text.includes("cash")) {
+    return "Clients can choose Cash, M-Pesa, or Card when requesting a job. Payment status appears in My Jobs. Live payment processing is the next gateway integration step.";
   }
   if (text.includes("review") || text.includes("rating")) {
     return "After a worker completes a job, the client can submit a rating in My Jobs. The worker rating updates automatically.";
@@ -296,6 +319,18 @@ function statusActions(job) {
     .join("");
 }
 
+function paymentActions(job) {
+  const canMarkPaid =
+    currentProfile?.role === "client" &&
+    job.client_id === currentUser?.id &&
+    job.payment_status !== "paid" &&
+    !["declined", "cancelled"].includes(job.status);
+
+  if (!canMarkPaid) return "";
+
+  return `<button type="button" data-payment-booking-id="${job.id}">Mark Paid</button>`;
+}
+
 function reviewForm(job) {
   const alreadyReviewed = job.reviews?.length > 0;
   const canReview =
@@ -388,12 +423,15 @@ function renderBookings(bookings) {
         <div><dt>Status</dt><dd>${escapeHtml(job.status)}</dd></div>
         <div><dt>Worker</dt><dd>${escapeHtml(job.worker_profiles?.display_name || "Assigned worker")}</dd></div>
         <div><dt>Price</dt><dd>${formatMoney(job.quoted_price)}</dd></div>
+        <div><dt>Payment</dt><dd>${escapeHtml(formatPaymentMethod(job.payment_method))}</dd></div>
+        <div><dt>Pay status</dt><dd>${escapeHtml(formatPaymentStatus(job.payment_status))}</dd></div>
         <div><dt>Preferred</dt><dd>${escapeHtml(formatDateTime(job.scheduled_for))}</dd></div>
         <div><dt>Requested</dt><dd>${escapeHtml(formatDateTime(job.created_at))}</dd></div>
       </dl>
       ${jobContactDetails(job)}
+      ${job.payment_reference ? `<p class="payment-reference">Payment ref: ${escapeHtml(job.payment_reference)}</p>` : ""}
       <p class="job-meta">${escapeHtml(job.job_location || "No location")} ${job.contact_phone ? "- " + escapeHtml(job.contact_phone) : ""}</p>
-      <div class="job-actions">${statusActions(job)}</div>
+      <div class="job-actions">${statusActions(job)}${paymentActions(job)}</div>
       ${reviewForm(job)}
     </article>
   `).join("");
@@ -523,6 +561,9 @@ async function loadBookings() {
       contact_phone,
       scheduled_for,
       status,
+      payment_method,
+      payment_status,
+      payment_reference,
       quoted_price,
       created_at,
       worker_profiles (
@@ -635,6 +676,27 @@ async function updateBookingStatus(bookingId, status) {
     return;
   }
 
+  await loadBookings();
+}
+
+async function markBookingPaid(bookingId) {
+  setJobsStatus("Updating payment...");
+
+  const { error } = await db
+    .from("bookings")
+    .update({
+      payment_status: "paid",
+      payment_reference: `Manual-${Date.now()}`,
+    })
+    .eq("id", bookingId);
+
+  if (error) {
+    console.error("Payment update error:", error);
+    setJobsStatus(error.message, "error");
+    return;
+  }
+
+  setJobsStatus("Payment marked as paid.", "success");
   await loadBookings();
 }
 
@@ -806,6 +868,7 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   const formData = new FormData(bookingForm);
   const serviceSlug = String(formData.get("service") || "");
+  const paymentMethod = String(formData.get("payment_method") || "cash");
   const contactPhone = String(formData.get("contact_phone") || "").trim();
   const jobLocation = String(formData.get("job_location") || "").trim();
   const jobDescription = String(formData.get("job_description") || "").trim();
@@ -830,7 +893,8 @@ bookingForm?.addEventListener("submit", async (event) => {
     job_location: jobLocation,
     contact_phone: contactPhone,
     scheduled_for: formData.get("scheduled_for") || null,
-    payment_method: "cash",
+    payment_method: paymentMethod,
+    payment_status: paymentMethod === "cash" ? "unpaid" : "pending",
     quoted_price: selectedWorker.base_price || null,
   };
 
@@ -1004,8 +1068,15 @@ profileForm?.addEventListener("submit", async (event) => {
 
 jobsList?.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-booking-id][data-status]");
-  if (!button) return;
-  updateBookingStatus(button.dataset.bookingId, button.dataset.status);
+  if (button) {
+    updateBookingStatus(button.dataset.bookingId, button.dataset.status);
+    return;
+  }
+
+  const paymentButton = event.target.closest("button[data-payment-booking-id]");
+  if (paymentButton) {
+    markBookingPaid(paymentButton.dataset.paymentBookingId);
+  }
 });
 
 jobsList?.addEventListener("submit", (event) => {
