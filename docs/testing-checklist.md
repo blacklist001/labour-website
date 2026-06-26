@@ -15,6 +15,7 @@ Use this checklist on the live Vercel site after each deployment.
 
 - Log in as a worker.
 - Save worker details with service, location, experience, price, working hours, and bio.
+- Set worker availability and emergency job readiness.
 - Upload a work photo.
 - Confirm the worker appears in Supabase `worker_profiles`.
 - Confirm the photo appears in Supabase Storage `worker-photos`.

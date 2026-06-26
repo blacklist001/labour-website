@@ -204,6 +204,19 @@
             <input type="text" name="working_hours" placeholder="Weekdays, weekends, emergency" required>
           </label>
           <label>
+            <span>Availability</span>
+            <select name="availability">
+              <option value="available">Available now</option>
+              <option value="today">Available today</option>
+              <option value="weekends">Weekends only</option>
+              <option value="busy">Busy</option>
+            </select>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="emergency_jobs">
+            <span>Available for emergency jobs</span>
+          </label>
+          <label>
             <span>Bio</span>
             <input type="text" name="bio" placeholder="Short description of your work" required>
           </label>

@@ -777,6 +777,25 @@ dd {
   border-color: #f0afa6;
 }
 
+.status-badge[data-status="emergency"] {
+  color: #5b2100;
+  background: #ffe1c4;
+  border-color: #f0b074;
+}
+
+.checkbox-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+}
+
 .job-contact {
   display: grid;
   gap: 2px;

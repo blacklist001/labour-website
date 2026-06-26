@@ -257,6 +257,7 @@ function workerCard(worker, index) {
         <p>${escapeHtml(serviceName(worker))} - ${Number(worker.experience_years || 0)} years experience</p>
       </div>
       <span class="badge">${worker.verification_status === "verified" ? "Verified" : "Pending"}</span>
+      ${worker.emergency_jobs ? `<span class="status-badge" data-status="emergency">Emergency jobs</span>` : ""}
       <p class="worker-location">${escapeHtml(worker.location_name || "Location not added")}</p>
       <p class="worker-bio">${escapeHtml(worker.bio || "No bio added yet.")}</p>
       <dl>
@@ -529,6 +530,7 @@ async function loadWorkers(serviceSlug = null) {
       experience_years,
       base_price,
       availability,
+      emergency_jobs,
       verification_status,
       rating_average,
       rating_count,
@@ -1303,6 +1305,8 @@ workerProfileForm?.addEventListener("submit", async (event) => {
   const bio = String(formData.get("bio") || "").trim();
   const locationName = String(formData.get("location_name") || "").trim();
   const workingHours = String(formData.get("working_hours") || "").trim();
+  const availability = String(formData.get("availability") || "available");
+  const emergencyJobs = formData.get("emergency_jobs") === "on";
   const experienceYears = Number(formData.get("experience_years") || 0);
   const basePrice = Number(formData.get("base_price") || 0);
 
@@ -1320,7 +1324,8 @@ workerProfileForm?.addEventListener("submit", async (event) => {
     experience_years: experienceYears,
     base_price: basePrice,
     working_hours: workingHours,
-    availability: "available",
+    availability,
+    emergency_jobs: emergencyJobs,
     verification_status: "pending",
   };
 
