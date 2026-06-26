@@ -886,6 +886,8 @@ async function ensureProfile(user, fallback = {}) {
     phone: fallback.phone || metadata.phone || null,
     role: fallback.role || metadata.role || "client",
     preferred_language: "en",
+    terms_accepted_at: fallback.terms_accepted_at || metadata.terms_accepted_at || null,
+    privacy_accepted_at: fallback.privacy_accepted_at || metadata.privacy_accepted_at || null,
   };
 
   const { data, error } = await db
@@ -1088,6 +1090,14 @@ signupForm?.addEventListener("submit", async (event) => {
   const role = String(formData.get("role") || "client");
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
+  const legalConsent = formData.get("legal_consent") === "on";
+
+  if (!legalConsent) {
+    setAccountStatus("Accept the Terms & Conditions and Privacy Policy before creating an account.", "error");
+    return;
+  }
+
+  const acceptedAt = new Date().toISOString();
 
   setAccountStatus("Creating account...");
 
@@ -1099,6 +1109,8 @@ signupForm?.addEventListener("submit", async (event) => {
         full_name: fullName,
         phone,
         role,
+        terms_accepted_at: acceptedAt,
+        privacy_accepted_at: acceptedAt,
       },
     },
   });
@@ -1116,7 +1128,13 @@ signupForm?.addEventListener("submit", async (event) => {
 
   currentUser = data.user;
   try {
-    await ensureProfile(data.user, { full_name: fullName, phone, role });
+    await ensureProfile(data.user, {
+      full_name: fullName,
+      phone,
+      role,
+      terms_accepted_at: acceptedAt,
+      privacy_accepted_at: acceptedAt,
+    });
     signupForm.reset();
     updateAuthUI();
   } catch (profileError) {

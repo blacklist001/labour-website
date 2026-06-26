@@ -10,6 +10,7 @@ Use this before sharing the website publicly.
 - Confirm HTTPS is active.
 - Add the official support email or phone number when it is ready.
 - Review Privacy Policy and Terms & Conditions with a qualified legal professional before public launch.
+- Confirm signup requires agreement to Privacy Policy and Terms & Conditions.
 
 ## Supabase Auth
 
