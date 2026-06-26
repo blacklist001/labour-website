@@ -35,6 +35,7 @@ Use this checklist on the live Vercel site after each deployment.
 - Log in as a client.
 - Search by service across Home & Repair, Automotive, Cleaning, Moving, Farm, Garden, Technical, Domestic, and Construction categories.
 - Select a verified worker.
+- Confirm domestic care bookings show and require the safety acknowledgement.
 - Submit a booking with phone, location, preferred time, and job details.
 - Confirm the booking appears in Supabase `bookings`.
 

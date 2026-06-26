@@ -621,6 +621,26 @@ dd {
   color: var(--muted);
 }
 
+.safety-notice {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  color: var(--ink);
+  background: #fff4ca;
+  border: 1px solid #ead07d;
+  border-radius: 8px;
+}
+
+.safety-notice p {
+  margin: 0;
+  color: #755200;
+  font-size: 0.86rem;
+}
+
+.safety-notice strong {
+  color: #755200;
+}
+
 .empty-actions {
   display: flex;
   flex-wrap: wrap;

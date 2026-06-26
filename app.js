@@ -14,6 +14,7 @@ const workerGrid = document.querySelector("#worker-grid");
 const refreshWorkersButton = document.querySelector("#refresh-workers-button");
 const workerSearch = document.querySelector("#worker-search");
 const bookingForm = document.querySelector("#booking-form");
+const bookingSafetyNotice = document.querySelector("#booking-safety-notice");
 const selectedWorkerEl = document.querySelector("#selected-worker");
 const jobsStatusEl = document.querySelector("#jobs-status");
 const jobsList = document.querySelector("#jobs-list");
@@ -41,6 +42,7 @@ let currentUser = null;
 let currentProfile = null;
 let selectedWorker = null;
 let isPasswordRecovery = false;
+const sensitiveServiceSlugs = new Set(["babysitter", "caregiver", "cook", "housekeeper"]);
 
 function setTheme(theme) {
   document.documentElement.dataset.theme = theme;
@@ -85,6 +87,23 @@ function clearSelectedWorker() {
   selectedWorker = null;
   if (selectedWorkerEl) {
     selectedWorkerEl.textContent = "Select a worker from the cards above.";
+  }
+}
+
+function selectedBookingServiceSlug() {
+  return bookingServiceSelect?.value || selectedWorker?.worker_services?.[0]?.services?.slug || "";
+}
+
+function updateBookingSafetyNotice() {
+  if (!bookingSafetyNotice) return;
+
+  const isSensitive = sensitiveServiceSlugs.has(selectedBookingServiceSlug());
+  bookingSafetyNotice.hidden = !isSensitive;
+
+  const checkbox = bookingSafetyNotice.querySelector('input[name="safety_acknowledged"]');
+  if (checkbox) {
+    checkbox.required = isSensitive;
+    if (!isSensitive) checkbox.checked = false;
   }
 }
 
@@ -295,6 +314,7 @@ function workerCard(worker, index) {
     selectedWorker = worker;
     selectedWorkerEl.textContent = `Selected ${worker.display_name || "worker"} for ${serviceName(worker)}.`;
     bookingServiceSelect.value = worker.worker_services?.[0]?.services?.slug || bookingServiceSelect.value;
+    updateBookingSafetyNotice();
     document.querySelector("#booking")?.scrollIntoView({ behavior: "smooth" });
   });
 
@@ -1028,6 +1048,7 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   const formData = new FormData(bookingForm);
   const serviceSlug = String(formData.get("service") || "");
+  const safetyAcknowledged = formData.get("safety_acknowledged") === "on";
   const paymentMethod = String(formData.get("payment_method") || "cash");
   const contactPhone = String(formData.get("contact_phone") || "").trim();
   const jobLocation = String(formData.get("job_location") || "").trim();
@@ -1035,6 +1056,11 @@ bookingForm?.addEventListener("submit", async (event) => {
 
   if (!contactPhone || !jobLocation || !jobDescription) {
     setStatus("Add contact phone, job location, and job details before requesting a job.", "error");
+    return;
+  }
+
+  if (sensitiveServiceSlugs.has(serviceSlug) && !safetyAcknowledged) {
+    setStatus("Acknowledge the safety guidance before requesting this domestic service.", "error");
     return;
   }
 
@@ -1080,6 +1106,10 @@ bookingForm?.addEventListener("submit", async (event) => {
   if (booking?.payment_method === "mpesa") {
     await startMpesaPayment(booking.id, booking.contact_phone, booking.quoted_price);
   }
+});
+
+bookingServiceSelect?.addEventListener("change", () => {
+  updateBookingSafetyNotice();
 });
 
 signupForm?.addEventListener("submit", async (event) => {
@@ -1470,6 +1500,7 @@ db.auth.onAuthStateChange((_event, session) => {
 });
 
 initTheme();
+updateBookingSafetyNotice();
 loadServices();
 loadWorkers();
 refreshSession();

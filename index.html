@@ -492,9 +492,20 @@
             <option value="welder">Welding</option>
             <option value="delivery-rider">Delivery rider</option>
             <option value="babysitter">Babysitter</option>
+            <option value="caregiver">Caregiver</option>
+            <option value="cook">Cook</option>
+            <option value="housekeeper">Housekeeper</option>
             <option value="casual-labourer">Casual labourer</option>
           </select>
         </label>
+        <div class="safety-notice" id="booking-safety-notice" hidden>
+          <strong>Safety check required</strong>
+          <p>For domestic care jobs, confirm identity, location, duties, timing, and emergency contact details before work begins.</p>
+          <label class="checkbox-label">
+            <input type="checkbox" name="safety_acknowledged">
+            <span>I understand this safety guidance.</span>
+          </label>
+        </div>
         <label>
           <span>Preferred time</span>
           <input type="datetime-local" name="scheduled_for">
