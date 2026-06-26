@@ -910,8 +910,45 @@ dd {
   color: var(--muted);
 }
 
+.site-footer a {
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
 .build-label {
   font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.legal-page {
+  padding: clamp(44px, 7vw, 88px) clamp(18px, 4vw, 64px);
+}
+
+.legal-document {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 44px);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.legal-document h1 {
+  max-width: none;
+}
+
+.legal-document h2 {
+  margin-top: 28px;
+  font-size: 1.35rem;
+}
+
+.legal-document p {
+  color: var(--muted);
+}
+
+.legal-updated {
+  color: var(--green-dark) !important;
   font-weight: 900;
 }
 

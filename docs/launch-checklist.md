@@ -9,6 +9,7 @@ Use this before sharing the website publicly.
 - Add a custom domain if needed.
 - Confirm HTTPS is active.
 - Add the official support email or phone number when it is ready.
+- Review Privacy Policy and Terms & Conditions with a qualified legal professional before public launch.
 
 ## Supabase Auth
 
