@@ -22,6 +22,8 @@ The frontend connects to Supabase in `app.js` using the public project URL and a
 
 Run `database/schema.sql` in the Supabase SQL Editor before expecting live services, worker profiles, bookings, and reviews to work.
 
+Services are grouped with `service_category`, covering home repair, automotive, cleaning, moving, farm, garden, technical, domestic, and construction work.
+
 Bookings include payment method, payment status, and payment reference fields. Cash and Card can be tracked manually. M-Pesa uses Vercel API functions for Daraja STK Push when the environment variables below are configured.
 
 ## M-Pesa Daraja Setup

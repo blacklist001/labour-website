@@ -114,18 +114,40 @@ function renderServices(services) {
   bookingServiceSelect.replaceChildren(...services.map(optionFor));
   workerServiceSelect?.replaceChildren(...services.map(optionFor));
 
+  const categories = services.reduce((groups, service) => {
+    const category = service.service_category || "General";
+    groups[category] = groups[category] || [];
+    groups[category].push(service);
+    return groups;
+  }, {});
+
   categoryGrid.replaceChildren(
-    ...services.map((service) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.dataset.service = service.slug;
-      button.textContent = service.name;
-      return button;
+    ...Object.entries(categories).map(([category, categoryServices]) => {
+      const group = document.createElement("article");
+      group.className = "category-group";
+
+      const title = document.createElement("h3");
+      title.textContent = category;
+
+      const list = document.createElement("div");
+      list.className = "category-buttons";
+      list.replaceChildren(
+        ...categoryServices.map((service) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.service = service.slug;
+          button.textContent = service.name;
+          return button;
+        })
+      );
+
+      group.append(title, list);
+      return group;
     })
   );
 
   if (serviceCountEl) {
-    serviceCountEl.textContent = `${services.length} services available, including ${services.map((service) => service.name).join(", ")}.`;
+    serviceCountEl.textContent = `${services.length} services available across ${Object.keys(categories).length} categories.`;
   }
 }
 
@@ -503,10 +525,24 @@ function renderAdminWorkers(workers) {
 async function loadServices() {
   setStatus("Connecting to LABOUR database...");
 
-  const { data, error } = await db
+  let { data, error } = await db
     .from("services")
-    .select("name, slug")
+    .select("name, slug, service_category")
+    .order("service_category", { ascending: true })
     .order("name", { ascending: true });
+
+  if (error && error.message?.includes("service_category")) {
+    const fallback = await db
+      .from("services")
+      .select("name, slug")
+      .order("name", { ascending: true });
+
+    data = (fallback.data || []).map((service) => ({
+      ...service,
+      service_category: "General",
+    }));
+    error = fallback.error;
+  }
 
   if (error) {
     setStatus("Database not ready yet. Run database/schema.sql in Supabase.", "error");

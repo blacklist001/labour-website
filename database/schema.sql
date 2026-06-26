@@ -21,20 +21,58 @@ create table if not exists public.services (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
   slug text not null unique,
+  service_category text not null default 'General',
   created_at timestamptz not null default now()
 );
 
-insert into public.services (name, slug)
+alter table public.services
+add column if not exists service_category text not null default 'General';
+
+insert into public.services (name, slug, service_category)
 values
-  ('Mason', 'mason'),
-  ('Plumber', 'plumber'),
-  ('Electrician', 'electrician'),
-  ('Painter', 'painter'),
-  ('Carpenter', 'carpenter'),
-  ('Cleaner', 'cleaner'),
-  ('Gardener', 'gardener'),
-  ('Mechanic', 'mechanic')
-on conflict (slug) do nothing;
+  ('Plumbers', 'plumber', 'Home & Repair Services'),
+  ('Electricians', 'electrician', 'Home & Repair Services'),
+  ('Painters', 'painter', 'Home & Repair Services'),
+  ('Carpenters', 'carpenter', 'Home & Repair Services'),
+  ('Masons', 'mason', 'Home & Repair Services'),
+  ('Roofers', 'roofer', 'Home & Repair Services'),
+  ('Welders', 'welder', 'Home & Repair Services'),
+  ('Glass installers', 'glass-installer', 'Home & Repair Services'),
+  ('Mechanics', 'mechanic', 'Automotive Services'),
+  ('Car electricians', 'car-electrician', 'Automotive Services'),
+  ('Tire repair', 'tire-repair', 'Automotive Services'),
+  ('Vehicle inspection', 'vehicle-inspection', 'Automotive Services'),
+  ('Car wash and detailing', 'car-wash-detailing', 'Automotive Services'),
+  ('House cleaners', 'house-cleaner', 'Cleaning Services'),
+  ('Office cleaners', 'office-cleaner', 'Cleaning Services'),
+  ('Sofa cleaning', 'sofa-cleaning', 'Cleaning Services'),
+  ('Window cleaning', 'window-cleaning', 'Cleaning Services'),
+  ('Cleaners', 'cleaner', 'Cleaning Services'),
+  ('Movers', 'mover', 'Moving & Transport'),
+  ('Packers', 'packer', 'Moving & Transport'),
+  ('Delivery riders', 'delivery-rider', 'Moving & Transport'),
+  ('Farm laborers', 'farm-laborer', 'Farm Services'),
+  ('Tree pruning', 'tree-pruning', 'Garden Services'),
+  ('Landscaping', 'landscaping', 'Garden Services'),
+  ('Grass cutting', 'grass-cutting', 'Garden Services'),
+  ('Garden maintenance', 'garden-maintenance', 'Garden Services'),
+  ('Gardeners', 'gardener', 'Garden Services'),
+  ('Computer repair', 'computer-repair', 'Technical Services'),
+  ('Phone repair', 'phone-repair', 'Technical Services'),
+  ('CCTV installation', 'cctv-installation', 'Technical Services'),
+  ('Network installation', 'network-installation', 'Technical Services'),
+  ('Babysitters', 'babysitter', 'Domestic Services'),
+  ('Caregivers', 'caregiver', 'Domestic Services'),
+  ('Cooks', 'cook', 'Domestic Services'),
+  ('Housekeepers', 'housekeeper', 'Domestic Services'),
+  ('Casual labourers', 'casual-labourer', 'Construction Services'),
+  ('Site supervisors', 'site-supervisor', 'Construction Services'),
+  ('Quantity surveyors', 'quantity-surveyor', 'Construction Services'),
+  ('Contractors', 'contractor', 'Construction Services')
+on conflict (slug) do update
+set
+  name = excluded.name,
+  service_category = excluded.service_category;
 
 create table if not exists public.worker_profiles (
   id uuid primary key default gen_random_uuid(),

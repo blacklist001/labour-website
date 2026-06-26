@@ -460,15 +460,37 @@ input {
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(110px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.category-group {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.category-group h3 {
+  font-size: 1rem;
+}
+
+.category-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .category-grid button {
-  min-height: 74px;
+  min-height: 50px;
+  padding: 8px 10px;
   color: var(--green-dark);
-  background: var(--white);
+  background: var(--soft-bg);
   border-color: var(--line);
+  font-size: 0.84rem;
 }
 
 .category-grid button:hover {
@@ -1007,7 +1029,7 @@ dd {
   }
 
   .category-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .worker-grid,
@@ -1077,8 +1099,9 @@ dd {
     font-size: clamp(1.45rem, 8vw, 2rem);
   }
 
-  .category-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .category-grid,
+  .category-buttons {
+    grid-template-columns: 1fr;
   }
 
   .category-grid button {

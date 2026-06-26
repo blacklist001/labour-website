@@ -22,7 +22,7 @@ Use this before sharing the website publicly.
 
 - Run the latest `database/schema.sql`.
 - Confirm Row Level Security is enabled.
-- Confirm services include Mechanic.
+- Confirm services include all requested service categories and trades.
 - Confirm an admin profile exists.
 - Confirm no service role key is exposed in the frontend.
 
