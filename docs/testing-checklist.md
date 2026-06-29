@@ -6,6 +6,7 @@ Use this checklist on the live Vercel site after each deployment.
 
 - Create a client account.
 - Create a worker account.
+- Confirm new accounts receive email confirmation and can use Resend Confirmation.
 - Log out and log back in.
 - Use Reset Password with a real email address.
 - Open the password reset email, return to the site, and set a new password.

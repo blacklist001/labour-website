@@ -34,6 +34,7 @@ const loginOnlyElements = document.querySelectorAll(".login-only");
 const profileForm = document.querySelector("#profile-form");
 const passwordUpdateForm = document.querySelector("#password-update-form");
 const resetPasswordButton = document.querySelector("#reset-password-button");
+const resendConfirmationButton = document.querySelector("#resend-confirmation-button");
 const logoutButton = document.querySelector("#logout-button");
 const accountStatusEl = document.querySelector("#account-status");
 const workerProfileForm = document.querySelector("#worker-profile-form");
@@ -42,6 +43,7 @@ let currentUser = null;
 let currentProfile = null;
 let selectedWorker = null;
 let isPasswordRecovery = false;
+let pendingConfirmationEmail = "";
 const sensitiveServiceSlugs = new Set(["babysitter", "caregiver", "cook", "housekeeper"]);
 
 function setTheme(theme) {
@@ -69,6 +71,10 @@ function withTimeout(promise, message, ms = 15000) {
       setTimeout(() => reject(new Error(message)), ms);
     }),
   ]);
+}
+
+function authRedirectUrl() {
+  return window.location.origin;
 }
 
 function setStatus(message, tone = "neutral") {
@@ -916,7 +922,28 @@ async function ensureProfile(user, fallback = {}) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    const missingConsentColumns =
+      error.message?.includes("terms_accepted_at") ||
+      error.message?.includes("privacy_accepted_at");
+
+    if (!missingConsentColumns) throw error;
+
+    const fallbackProfile = { ...profile };
+    delete fallbackProfile.terms_accepted_at;
+    delete fallbackProfile.privacy_accepted_at;
+
+    const { data: fallbackData, error: fallbackError } = await db
+      .from("profiles")
+      .upsert(fallbackProfile, { onConflict: "id" })
+      .select()
+      .single();
+
+    if (fallbackError) throw fallbackError;
+    currentProfile = fallbackData;
+    return fallbackData;
+  }
+
   currentProfile = data;
   return data;
 }
@@ -1135,6 +1162,7 @@ signupForm?.addEventListener("submit", async (event) => {
     email,
     password,
     options: {
+      emailRedirectTo: authRedirectUrl(),
       data: {
         full_name: fullName,
         phone,
@@ -1151,7 +1179,8 @@ signupForm?.addEventListener("submit", async (event) => {
   }
 
   if (!data.session) {
-    setAccountStatus("Account created. Check your email to confirm, then log in.", "success");
+    pendingConfirmationEmail = email;
+    setAccountStatus("Account created. Check your email and click the confirmation link before logging in. Use Resend Confirmation if the email does not arrive.", "success");
     signupForm.reset();
     return;
   }
@@ -1190,7 +1219,11 @@ loginForm?.addEventListener("submit", async (event) => {
     );
 
     if (error) {
-      setAccountStatus(error.message, "error");
+      const message = error.message.toLowerCase().includes("confirm")
+        ? "Email not confirmed yet. Check your inbox, click the confirmation link, then log in. You can also click Resend Confirmation."
+        : error.message;
+      pendingConfirmationEmail = email;
+      setAccountStatus(message, "error");
       return;
     }
 
@@ -1201,6 +1234,45 @@ loginForm?.addEventListener("submit", async (event) => {
     setAccountStatus(loginError.message || "Login failed. Try again.", "error");
   } finally {
     submitButton.disabled = false;
+  }
+});
+
+resendConfirmationButton?.addEventListener("click", async () => {
+  const formData = new FormData(loginForm);
+  const email = String(formData.get("email") || pendingConfirmationEmail || "").trim();
+
+  if (!email) {
+    setAccountStatus("Enter your email first, then click Resend Confirmation.", "error");
+    return;
+  }
+
+  setAccountStatus("Sending confirmation email...");
+  resendConfirmationButton.disabled = true;
+
+  try {
+    const { error } = await withTimeout(
+      db.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: authRedirectUrl(),
+        },
+      }),
+      "Confirmation email is taking too long. Try again."
+    );
+
+    if (error) {
+      setAccountStatus(error.message, "error");
+      return;
+    }
+
+    pendingConfirmationEmail = email;
+    setAccountStatus("Confirmation email sent. Check your inbox, then log in after confirming.", "success");
+  } catch (error) {
+    console.error("Confirmation resend error:", error);
+    setAccountStatus(error.message || "Confirmation email failed.", "error");
+  } finally {
+    resendConfirmationButton.disabled = false;
   }
 });
 
@@ -1226,7 +1298,7 @@ resetPasswordButton?.addEventListener("click", async () => {
   try {
     const { error } = await withTimeout(
       db.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin,
+        redirectTo: authRedirectUrl(),
       }),
       "Password reset is taking too long. Try again."
     );
