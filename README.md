@@ -24,6 +24,8 @@ Run `database/schema.sql` in the Supabase SQL Editor before expecting live servi
 
 Services are grouped with `service_category`, covering home repair, automotive, cleaning, moving, farm, garden, technical, domestic, and construction work.
 
+The schema includes indexes for account, worker, booking, payment callback, and review lookups. The frontend also limits dashboard/admin lists so larger account volumes do not overload the page.
+
 Bookings include payment method, payment status, and payment reference fields. Cash and Card can be tracked manually. M-Pesa uses Vercel API functions for Daraja STK Push when the environment variables below are configured.
 
 ## M-Pesa Daraja Setup

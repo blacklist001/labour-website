@@ -207,6 +207,45 @@ create table if not exists public.reviews (
   created_at timestamptz not null default now()
 );
 
+create index if not exists profiles_role_idx
+on public.profiles (role);
+
+create index if not exists services_category_name_idx
+on public.services (service_category, name);
+
+create index if not exists worker_profiles_user_id_idx
+on public.worker_profiles (user_id);
+
+create index if not exists worker_profiles_verification_created_idx
+on public.worker_profiles (verification_status, created_at desc);
+
+create index if not exists worker_profiles_rating_idx
+on public.worker_profiles (rating_average desc, rating_count desc);
+
+create index if not exists worker_services_service_id_idx
+on public.worker_services (service_id);
+
+create index if not exists worker_photos_worker_id_idx
+on public.worker_photos (worker_id);
+
+create index if not exists bookings_client_created_idx
+on public.bookings (client_id, created_at desc);
+
+create index if not exists bookings_worker_created_idx
+on public.bookings (worker_id, created_at desc);
+
+create index if not exists bookings_status_idx
+on public.bookings (status);
+
+create index if not exists bookings_checkout_request_idx
+on public.bookings (checkout_request_id);
+
+create index if not exists reviews_worker_id_idx
+on public.reviews (worker_id);
+
+create index if not exists reviews_client_id_idx
+on public.reviews (client_id);
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql

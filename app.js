@@ -674,7 +674,8 @@ async function loadBookings() {
         comment
       )
     `)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(50);
 
   if (error) {
     console.error("Booking load error:", error);
@@ -698,7 +699,8 @@ async function loadAdminWorkers() {
   let query = db
     .from("worker_profiles")
     .select("id, display_name, bio, location_name, base_price, verification_status, created_at")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(50);
 
   if (status !== "all") {
     query = query.eq("verification_status", status);
