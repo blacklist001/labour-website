@@ -42,7 +42,7 @@
       <div class="hero-copy">
         <p class="eyebrow">Client and worker portals</p>
         <h1 id="hero-title">Find trusted workers near you.</h1>
-        <p class="hero-text">Book verified workers for home repair, automotive, cleaning, moving, farm, garden, technical, domestic, and construction services with ratings, photos, clear pricing, and live availability.</p>
+        <p class="hero-text">Book available workers for home repair, automotive, cleaning, moving, farm, garden, technical, domestic, and construction services with ratings, photos, clear pricing, and live availability.</p>
         <form class="search-panel" id="worker-search" aria-label="Find a worker">
           <label>
             <span>Service</span>
@@ -472,7 +472,7 @@
       </article>
       <article id="worker-flow" class="flow-panel dark">
         <p class="eyebrow">Worker Flow</p>
-        <h2>Register, get verified, receive jobs</h2>
+        <h2>Register, go live, receive jobs</h2>
         <ol>
           <li>Add personal details, phone, and ID verification.</li>
           <li>Choose profession and optional education or skills.</li>
@@ -486,7 +486,7 @@
       <div>
         <p class="eyebrow">Worker profile</p>
         <h2 id="booking-title">Hire with confidence</h2>
-        <p>Each profile combines identity verification, job history, a gallery, ratings, chat, call, emergency availability, and English or Swahili support.</p>
+        <p>Each profile combines job history, a gallery, ratings, chat, call, emergency availability, and English or Swahili support.</p>
       </div>
       <form class="booking-card" id="booking-form" aria-label="Book a worker">
         <p class="selected-worker" id="selected-worker">Select a worker from the cards above.</p>
@@ -559,20 +559,20 @@
     <section id="admin" class="admin" aria-labelledby="admin-title" hidden>
       <div class="section-heading">
         <p class="eyebrow">Admin</p>
-        <h2 id="admin-title">Verify workers</h2>
-        <p class="section-copy">Approve trusted workers so they can appear in search results and receive bookings.</p>
+        <h2 id="admin-title">Manage workers</h2>
+        <p class="section-copy">Review worker profiles, keep records clean, and reject profiles that should not appear to clients.</p>
       </div>
       <div class="admin-panel">
         <label class="admin-filter">
           <span>Worker status</span>
           <select id="admin-worker-filter">
-            <option value="pending">Pending</option>
             <option value="verified">Verified</option>
             <option value="rejected">Rejected</option>
+            <option value="pending">Pending</option>
             <option value="all">All workers</option>
           </select>
         </label>
-        <p class="admin-status" id="admin-status">Log in as an admin to review workers.</p>
+        <p class="admin-status" id="admin-status">Log in as an admin to manage workers.</p>
         <div class="admin-list" id="admin-list"></div>
       </div>
     </section>

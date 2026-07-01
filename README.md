@@ -1,6 +1,6 @@
 # LABOUR Website
 
-A static prototype for LABOUR, a local marketplace for clients to find verified workers and for workers to register, receive job requests, and get paid.
+A static prototype for LABOUR, a local marketplace for clients to find available workers and for workers to register, receive job requests, and get paid.
 
 ## Open Locally
 

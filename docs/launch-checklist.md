@@ -36,10 +36,9 @@ Use this before sharing the website publicly.
 
 ## Admin
 
-- Review pending workers.
-- Approve at least one real worker.
+- Review worker profiles.
 - Reject a test worker.
-- Confirm only verified workers appear publicly.
+- Confirm rejected workers do not appear publicly.
 
 ## Client Flow
 

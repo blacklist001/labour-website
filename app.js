@@ -226,22 +226,22 @@ function escapeHtml(value) {
 function chatbotReply(message) {
   const text = message.toLowerCase();
   if (text.includes("book") || text.includes("hire")) {
-    return "To book a worker: create or log in as a client, search for a service, select a verified worker, fill the booking form, then click Request Job.";
+    return "To book a worker: create or log in as a client, search for a service, select an available worker, fill the booking form, then click Request Job.";
   }
   if (text.includes("mechanic") || text.includes("car") || text.includes("vehicle")) {
-    return "Mechanic is available as a service. Choose Mechanic in the service dropdown, then search for verified mechanics.";
+    return "Mechanic is available as a service. Choose Mechanic in the service dropdown, then search for available mechanics.";
   }
   if (text.includes("photo") || text.includes("upload") || text.includes("picture")) {
-    return "Workers can upload a work photo from Account > Worker details. The photo appears on worker cards after the profile is approved.";
+    return "Workers can upload a work photo from Account > Worker details. The photo appears on worker cards after the profile is saved.";
   }
   if (text.includes("dark") || text.includes("light") || text.includes("theme")) {
     return "Use the Dark or Light button in the header to switch theme. The site remembers your choice.";
   }
   if (text.includes("worker") || text.includes("register")) {
-    return "To register as a worker: create an account with role Worker, log in, fill Worker details, then wait for admin approval.";
+    return "To register as a worker: create an account with role Worker, log in, fill Worker details, then your profile can appear for clients.";
   }
   if (text.includes("admin") || text.includes("approve") || text.includes("verify")) {
-    return "Admins can open the Admin section, review pending workers, then approve or reject them. Only approved workers appear in search.";
+    return "Admins can open the Admin section to review worker profiles, keep records clean, and reject profiles that should not appear to clients.";
   }
   if (text.includes("password") || text.includes("login")) {
     return "For login help: enter your email and password in Account. If you forgot the password, enter your email and click Reset Password.";
@@ -258,7 +258,7 @@ function chatbotReply(message) {
   if (text.includes("test") || text.includes("launch")) {
     return "Use the testing and launch checklists in the GitHub repo docs folder to verify the app before sharing it publicly.";
   }
-  return "I can help with booking, worker signup, mechanic services, photo uploads, login, admin approval, job status, reviews, dark mode, and launch testing. What would you like to do?";
+  return "I can help with booking, worker signup, mechanic services, photo uploads, login, admin tools, job status, reviews, dark mode, and launch testing. What would you like to do?";
 }
 
 function addChatMessage(text, type = "bot") {
@@ -303,7 +303,7 @@ function workerCard(worker, index) {
         <h3>${escapeHtml(worker.display_name || "LABOUR worker")}</h3>
         <p>${escapeHtml(serviceName(worker))} - ${Number(worker.experience_years || 0)} years experience</p>
       </div>
-      <span class="badge">${worker.verification_status === "verified" ? "Verified" : "Pending"}</span>
+      <span class="badge">${worker.verification_status === "rejected" ? "Unavailable" : "Available"}</span>
       ${worker.emergency_jobs ? `<span class="status-badge" data-status="emergency">Emergency jobs</span>` : ""}
       <p class="worker-location">${escapeHtml(worker.location_name || "Location not added")}</p>
       <p class="worker-bio">${escapeHtml(worker.bio || "No bio added yet.")}</p>
@@ -332,11 +332,10 @@ function renderWorkers(workers) {
   if (!workers.length) {
     workerGrid.innerHTML = `
       <article class="empty-state">
-        <h3>No verified workers yet</h3>
-        <p>Workers appear here after an admin approves their profile.</p>
+        <h3>No workers yet</h3>
+        <p>Workers will appear here after they register and save their profile.</p>
         <div class="empty-actions">
           <a href="#account">Register as Worker</a>
-          <a href="#admin">Admin Review</a>
         </div>
       </article>
     `;
@@ -474,7 +473,7 @@ function renderBookings(bookings) {
     jobsList.innerHTML = `
       <article class="job-card">
         <h3>No jobs yet</h3>
-        <p>Your booking requests will appear here after a client selects a verified worker.</p>
+        <p>Your booking requests will appear here after a client selects your worker profile.</p>
         <div class="empty-actions">
           <a href="#workers">Find Workers</a>
           <a href="#booking">Request Job</a>
@@ -538,7 +537,7 @@ function renderAdminWorkers(workers) {
         <div><dt>Status</dt><dd>${escapeHtml(worker.verification_status)}</dd></div>
       </dl>
       <div class="admin-actions">
-        ${worker.verification_status !== "verified" ? `<button type="button" data-worker-id="${worker.id}" data-verification="verified">Approve</button>` : ""}
+        ${worker.verification_status !== "verified" ? `<button type="button" data-worker-id="${worker.id}" data-verification="verified">Set Available</button>` : ""}
         ${worker.verification_status !== "rejected" ? `<button type="button" data-worker-id="${worker.id}" data-verification="rejected">Reject</button>` : ""}
         ${worker.verification_status !== "pending" ? `<button type="button" data-worker-id="${worker.id}" data-verification="pending">Set Pending</button>` : ""}
       </div>
@@ -608,7 +607,7 @@ async function loadWorkers(serviceSlug = null) {
         caption
       )
     `)
-    .eq("verification_status", "verified")
+    .neq("verification_status", "rejected")
     .limit(9);
 
   const { data, error } = await query;
@@ -693,7 +692,7 @@ async function loadAdminWorkers() {
     return;
   }
 
-  const status = adminWorkerFilter?.value || "pending";
+  const status = adminWorkerFilter?.value || "verified";
   setAdminStatus("Loading workers...");
 
   let query = db
@@ -1050,7 +1049,7 @@ workerSearch?.addEventListener("submit", async (event) => {
 
   const data = await loadWorkers(service);
   const count = data.length;
-  setStatus(count ? `Found ${count} verified workers.` : "Connected. No verified workers have been added yet.", "success");
+  setStatus(count ? `Found ${count} available workers.` : "Connected. No available workers have been added yet.", "success");
 });
 
 refreshWorkersButton?.addEventListener("click", async () => {
@@ -1058,7 +1057,7 @@ refreshWorkersButton?.addEventListener("click", async () => {
   clearSelectedWorker();
   setStatus("Refreshing workers...", "neutral");
   const data = await loadWorkers(service);
-  setStatus(data.length ? `Refreshed ${data.length} verified workers.` : "No verified workers found for this service.", "success");
+  setStatus(data.length ? `Refreshed ${data.length} available workers.` : "No available workers found for this service.", "success");
 });
 
 bookingForm?.addEventListener("submit", async (event) => {
@@ -1484,7 +1483,7 @@ workerProfileForm?.addEventListener("submit", async (event) => {
     working_hours: workingHours,
     availability,
     emergency_jobs: emergencyJobs,
-    verification_status: "pending",
+    verification_status: "verified",
   };
 
   setAccountStatus("Saving worker profile...");
@@ -1545,7 +1544,7 @@ workerProfileForm?.addEventListener("submit", async (event) => {
   }
 
   workerProfileForm.reset();
-  setAccountStatus("Worker profile saved. Verification status is pending.", "success");
+  setAccountStatus("Worker profile saved. Clients can now find this worker profile.", "success");
 });
 
 db.auth.onAuthStateChange((_event, session) => {

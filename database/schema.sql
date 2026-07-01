@@ -95,7 +95,7 @@ create table if not exists public.worker_profiles (
   base_price numeric(12, 2) check (base_price >= 0),
   availability text not null default 'available',
   working_hours text,
-  verification_status text not null default 'pending' check (verification_status in ('pending', 'verified', 'rejected')),
+  verification_status text not null default 'verified' check (verification_status in ('pending', 'verified', 'rejected')),
   emergency_jobs boolean not null default false,
   rating_average numeric(3, 2) not null default 0 check (rating_average >= 0 and rating_average <= 5),
   rating_count integer not null default 0 check (rating_count >= 0),
@@ -108,6 +108,13 @@ add column if not exists display_name text;
 
 alter table public.worker_profiles
 add column if not exists phone text;
+
+alter table public.worker_profiles
+alter column verification_status set default 'verified';
+
+update public.worker_profiles
+set verification_status = 'verified'
+where verification_status = 'pending';
 
 create table if not exists public.worker_services (
   worker_id uuid not null references public.worker_profiles(id) on delete cascade,
@@ -327,9 +334,10 @@ on public.services for select
 using (true);
 
 drop policy if exists "Verified worker profiles are public" on public.worker_profiles;
-create policy "Verified worker profiles are public"
+drop policy if exists "Active worker profiles are public" on public.worker_profiles;
+create policy "Active worker profiles are public"
 on public.worker_profiles for select
-using (verification_status = 'verified' or user_id = auth.uid() or public.is_admin());
+using (verification_status <> 'rejected' or user_id = auth.uid() or public.is_admin());
 
 drop policy if exists "Worker services are public" on public.worker_services;
 create policy "Worker services are public"
